@@ -32,7 +32,7 @@ size_t X = 0;
 size_t Y = 1;
 size_t Z = 2;
 
-         std::vector<void *>      Heap;
+std::vector<void *> Heap;
 }    // namespace
 
 void DeleteHeap()
