@@ -22,8 +22,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
             "Vapor's Startup Settings",
             {
                 new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
-                //(new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads)->SetRange(0,1024)),
-                new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads),
+                (new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads))->SetRange(0,1024),
                 new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
                 new PCheckboxHLI<SettingsParams>("Lock window dimensions", &SettingsParams::GetWinSizeLock, &SettingsParams::SetWinSizeLock),
                 (new PIntegerInputHLI<SettingsParams>("Width", &SettingsParams::GetWinWidth, &SettingsParams::SetWinWidth))->EnableBasedOnParam(SettingsParams::_winSizeLockTag),
