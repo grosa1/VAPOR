@@ -3,6 +3,9 @@
 #include "PWidgets.h"
 #include "PSliceSampleLocationSelector.h"
 
+
+
+
 using namespace VAPoR;
 
 static RenderEventRouterRegistrar<SliceEventRouter> registrar(SliceEventRouter::GetClassType());
