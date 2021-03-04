@@ -20,7 +20,7 @@ else
 
             if [ "$NUMBERS" != "" ]; then
                 echo "  Running clang-format on $FILE"
-                clang-format -i $FILE $NUMBERS
+#                clang-format -i $FILE $NUMBERS
             fi
         done
     done

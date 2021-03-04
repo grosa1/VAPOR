@@ -3,6 +3,10 @@
 #include "RenderEventRouter.h"
 #include <vapor/SliceRenderer.h>
 
+
+
+
+
 //!
 //! \class SliceEventRouter
 //! \ingroup Public_GUI
