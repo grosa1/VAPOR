@@ -5,7 +5,6 @@
 
 
 
-
 using namespace VAPoR;
 
 static RenderEventRouterRegistrar<SliceEventRouter> registrar(SliceEventRouter::GetClassType());

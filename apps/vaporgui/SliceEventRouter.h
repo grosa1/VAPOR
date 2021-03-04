@@ -5,8 +5,6 @@
 
 
 
-
-
 //!
 //! \class SliceEventRouter
 //! \ingroup Public_GUI
