@@ -12,6 +12,15 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 {
     // clang-format off
 
+
+
+
+
+
+
+
+
+
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
             new PHeightVariableSelector
