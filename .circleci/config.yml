@@ -28,6 +28,7 @@ jobs:
           name: cmake and make
           command: |
             cd build
+            make clean
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
 
