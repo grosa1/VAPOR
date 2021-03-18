@@ -46,7 +46,7 @@ jobs:
           name: cmake3 and make
           command: |
             cd /root/project/build
-            git branch --set-upstream-to=origin/<branch> installers
+            git branch --set-upstream-to=origin/installers installers
             git pull
             git checkout main
             git reset --hard origin/main
