@@ -47,7 +47,7 @@ jobs:
           command: |
             cd /root/project/build
             git pull
-#            git checkout main
+            git checkout main
 #            git reset --hard origin/main
 #            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
 #            make
