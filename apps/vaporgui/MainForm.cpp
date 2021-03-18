@@ -161,97 +161,97 @@ string makename(string file)
 void MainForm::_initMembers()
 
     _mdiArea = NULL;
-    _App = NULL;
+_App = NULL;
 
-    _playForwardAction = NULL;
-    _playBackwardAction = NULL;
-    _pauseAction = NULL;
+_playForwardAction = NULL;
+_playBackwardAction = NULL;
+_pauseAction = NULL;
 
-    _navigationAction = NULL;
-    _editUndoAction = NULL;
-    _editRedoAction = NULL;
-    _timeStepEdit = NULL;
-    _timeStepEditValidator = NULL;
+_navigationAction = NULL;
+_editUndoAction = NULL;
+_editRedoAction = NULL;
+_timeStepEdit = NULL;
+_timeStepEditValidator = NULL;
 
-    _alignViewCombo = NULL;
-    _modeCombo = NULL;
-    _main_Menubar = NULL;
-    _File = NULL;
-    _Edit = NULL;
-    _Tools = NULL;
-    _captureMenu = NULL;
-    _helpMenu = NULL;
+_alignViewCombo = NULL;
+_modeCombo = NULL;
+_main_Menubar = NULL;
+_File = NULL;
+_Edit = NULL;
+_Tools = NULL;
+_captureMenu = NULL;
+_helpMenu = NULL;
 
-    _modeToolBar = NULL;
-    _vizToolBar = NULL;
-    _animationToolBar = NULL;
+_modeToolBar = NULL;
+_vizToolBar = NULL;
+_animationToolBar = NULL;
 
-    _dataMenu = NULL;
-    _closeVDCMenu = NULL;
-    _importMenu = NULL;
-    _sessionMenu = NULL;
+_dataMenu = NULL;
+_closeVDCMenu = NULL;
+_importMenu = NULL;
+_sessionMenu = NULL;
 
-    _fileOpenAction = NULL;
-    _fileSaveAction = NULL;
-    _fileSaveAsAction = NULL;
-    _fileExitAction = NULL;
-    _fileNew_SessionAction = NULL;
+_fileOpenAction = NULL;
+_fileSaveAction = NULL;
+_fileSaveAsAction = NULL;
+_fileExitAction = NULL;
+_fileNew_SessionAction = NULL;
 
-    _helpAboutAction = NULL;
-    _whatsThisAction = NULL;
-    _installCLIToolsAction = NULL;
-    _webDocumentationAction = NULL;
+_helpAboutAction = NULL;
+_whatsThisAction = NULL;
+_installCLIToolsAction = NULL;
+_webDocumentationAction = NULL;
 
-    _dataImportWRF_Action = NULL;
-    _dataImportCF_Action = NULL;
-    _dataImportMPAS_Action = NULL;
-    _dataLoad_MetafileAction = NULL;
-    _dataClose_MetafileAction = NULL;
-    _plotAction = NULL;
-    _statsAction = NULL;
-    _pythonAction = NULL;
+_dataImportWRF_Action = NULL;
+_dataImportCF_Action = NULL;
+_dataImportMPAS_Action = NULL;
+_dataLoad_MetafileAction = NULL;
+_dataClose_MetafileAction = NULL;
+_plotAction = NULL;
+_statsAction = NULL;
+_pythonAction = NULL;
 
-    _singleImageMenu = NULL;
-    _captureSingleJpegAction = NULL;
-    _captureSinglePngAction = NULL;
-    _captureSingleTiffAction = NULL;
+_singleImageMenu = NULL;
+_captureSingleJpegAction = NULL;
+_captureSinglePngAction = NULL;
+_captureSingleTiffAction = NULL;
 
-    _imageSequenceMenu = NULL;
-    _captureJpegSequenceAction = NULL;
-    _capturePngSequenceAction = NULL;
-    _captureTiffSequenceAction = NULL;
+_imageSequenceMenu = NULL;
+_captureJpegSequenceAction = NULL;
+_capturePngSequenceAction = NULL;
+_captureTiffSequenceAction = NULL;
 
-    _captureEndImageAction = NULL;
+_captureEndImageAction = NULL;
 
-    _mouseModeActions = NULL;
-    _tileAction = NULL;
-    _cascadeAction = NULL;
-    _homeAction = NULL;
-    _sethomeAction = NULL;
-    _viewAllAction = NULL;
-    _viewRegionAction = NULL;
-    _stepForwardAction = NULL;
-    _stepBackAction = NULL;
-    _interactiveRefinementSpin = NULL;
-    _tabDockWindow = NULL;
+_mouseModeActions = NULL;
+_tileAction = NULL;
+_cascadeAction = NULL;
+_homeAction = NULL;
+_sethomeAction = NULL;
+_viewAllAction = NULL;
+_viewRegionAction = NULL;
+_stepForwardAction = NULL;
+_stepBackAction = NULL;
+_interactiveRefinementSpin = NULL;
+_tabDockWindow = NULL;
 
-    _stats = NULL;
-    _plot = NULL;
-    _pythonVariables = NULL;
-    _banner = NULL;
-    _windowSelector = NULL;
-    _controlExec = NULL;
-    _paramsMgr = NULL;
-    _tabMgr = NULL;
-    _vizWinMgr = NULL;
+_stats = NULL;
+_plot = NULL;
+_pythonVariables = NULL;
+_banner = NULL;
+_windowSelector = NULL;
+_controlExec = NULL;
+_paramsMgr = NULL;
+_tabMgr = NULL;
+_vizWinMgr = NULL;
 
-    _capturingAnimationVizName.clear();
+_capturingAnimationVizName.clear();
 
-    _stateChangeFlag = false;
-    _sessionNewFlag = false;
-    _begForCitation = false;
-    _eventsSinceLastSave = 0;
-    _buttonPressed = false;
+_stateChangeFlag = false;
+_sessionNewFlag = false;
+_begForCitation = false;
+_eventsSinceLastSave = 0;
+_buttonPressed = false;
 }
 
 class ProgressStatusBar : public QWidget {
