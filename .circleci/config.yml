@@ -21,9 +21,7 @@ jobs:
       - run:
           name: make installer
           command: |
-            cd /VAPOR/build
-            git checkout main
-            git pull
+            cd build
             git reset --hard origin/main
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
@@ -47,19 +45,14 @@ jobs:
       - run:
           name: cmake3 and make
           command: |
-            ls -lrth /usr/local/VAPOR-Deps
-            cd /VAPOR
-            git checkout main
-            git pull
-            git reset --hard origin/main
             cd build
+            git reset --hard origin/main
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
-
 
       - persist_to_workspace:
           root: *workspace_root
