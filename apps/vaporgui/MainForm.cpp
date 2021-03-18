@@ -159,7 +159,7 @@ string makename(string file)
 };    // namespace
 
 void MainForm::_initMembers()
-{
+
     _mdiArea = NULL;
     _App = NULL;
 
