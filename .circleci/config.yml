@@ -46,13 +46,13 @@ jobs:
           name: cmake3 and make
           command: |
             cd build
-            git reset --hard origin/main
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+            #git reset --hard origin/main
+            #cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            #make
+            #make installer
+            #for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
+            #mkdir -p /tmp/workspace/installers
+            #mv *.sh /tmp/workspace/installers
 
       - persist_to_workspace:
           root: *workspace_root
@@ -168,7 +168,7 @@ jobs:
             #i="Windows10: `shasum -a 256 VAPOR3*win64*`"
             message="$a$b$c$d$e$f$g$h"
             echo $message
-            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate 3.3preRelease /tmp/workspace/installers
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate 3.4preRelease /tmp/workspace/installers
 
   release_preInstallers:
     macos:
