@@ -45,8 +45,7 @@ jobs:
       - run:
           name: cmake3 and make
           command: |
-            cd /root/project/build
-            git pull
+            cd build
             git reset --hard origin/main
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
