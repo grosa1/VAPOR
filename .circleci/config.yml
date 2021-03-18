@@ -22,9 +22,9 @@ jobs:
           name: make installer
           command: |
             cd /VAPOR/build
-            git checkout master
+            git checkout main
             git pull
-            git reset --hard origin/master
+            git reset --hard origin/main
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
             make installer
@@ -49,9 +49,9 @@ jobs:
           command: |
             ls -lrth /usr/local/VAPOR-Deps
             cd /VAPOR
-            git checkout master
+            git checkout main
             git pull
-            git reset --hard origin/master
+            git reset --hard origin/main
             cd build
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
@@ -68,7 +68,7 @@ jobs:
 
   build_osx_installer:
     macos:
-      xcode: "11.1.0"
+      xcode: "12.4.0"
     steps:
       - run:
           name: Make VAPOR-Deps
@@ -90,9 +90,9 @@ jobs:
       - run:
           name: make VAPOR
           command: |
-            git checkout master
+            git checkout main
             git pull --no-commit && git commit --allow-empty -m "Merge"
-            git reset --hard origin/master
+            git reset --hard origin/main
             cp site_files/site.NCAR site.local
             mkdir build
             cd build

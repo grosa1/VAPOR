@@ -350,10 +350,9 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
         // First calculate the starting time stamp. Copied from legacy.
         double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
-            int pastNumOfTimeSteps = rp->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
             // note that _cache_currentTS is cast to a signed integer.
-            if (int(_cache_currentTS) - pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
+            if (int(_cache_currentTS) - _cache_pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - _cache_pastNumOfTimeSteps];
         }
 
         for (int s = 0; s < nStreams; s++) {
@@ -607,9 +606,8 @@ int FlowRenderer::_renderFromAnAdvectionLegacy(const flow::Advection *adv, FlowP
     } else    // Unsteady flow (only occurs with forward direction)
     {
         // First calculate the starting time stamp
-        int    pastNumOfTimeSteps = params->GetPastNumOfTimeSteps();
         double startingTime = _timestamps[0];
-        if (_cache_currentTS - pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
+        if (int(_cache_currentTS) - _cache_pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - _cache_pastNumOfTimeSteps];
 
         std::vector<float> vec;
         for (size_t s = 0; s < numOfStreams; s++) {
@@ -713,7 +711,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         }
     }
 
-    // Check variable names
+    // Check velocity variable names
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
     // Note: RenderParams always returns arrays of size 3 here.
@@ -725,6 +723,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
+    // Check color mapping variable names
     std::string colorVarName = params->GetColorMapVariableName();
     if (colorVarName != _colorField.ScalarName) { _colorStatus = FlowStatus::SIMPLE_OUTOFDATE; }
 
@@ -824,7 +823,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check the bias variable and bias strength
     const auto rakeBiasVariable = params->GetRakeBiasVariable();
-    const auto rakeBiasStrength = params->GetRakeBiasStrength();
+    const auto rakeBiasStrength = params->GetRakeBiasStrength() * 100;
     if (_cache_rakeBiasStrength != rakeBiasStrength || _cache_rakeBiasVariable.compare(rakeBiasVariable) != 0) {
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
@@ -875,13 +874,17 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     {
         if (!_cache_isSteady)    // unsteady state isn't changed
         {
+            // First consider if the advection needs to be updated.
             if (_cache_currentTS < params->GetCurrentTimestep()) {
                 if (_colorStatus == FlowStatus::UPTODATE) { _colorStatus = FlowStatus::TIME_STEP_OOD; }
                 if (_velocityStatus == FlowStatus::UPTODATE) { _velocityStatus = FlowStatus::TIME_STEP_OOD; }
             }
-            if (_cache_currentTS != params->GetCurrentTimestep()) _renderStatus = FlowStatus::TIME_STEP_OOD;
+
+            // Second consider if the rendering needs to be updated.
+            if (_cache_currentTS != params->GetCurrentTimestep() || _cache_pastNumOfTimeSteps != params->GetPastNumOfTimeSteps()) { _renderStatus = FlowStatus::SIMPLE_OUTOFDATE; }
             _cache_currentTS = params->GetCurrentTimestep();
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
+            _cache_pastNumOfTimeSteps = params->GetPastNumOfTimeSteps();
         } else    // switched from steady to unsteady
         {
             _cache_isSteady = false;
@@ -1074,7 +1077,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     std::vector<double> locD(3);
     auto                timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
-    long numOfSeedsToGen = long(numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1.0f));
+    auto numOfSeedsToGen = numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1);
     long numOfTrials = 0;
     seeds.clear();
     seeds.reserve(numOfSeedsToGen);    // For performance reasons
@@ -1120,16 +1123,19 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     }
 
     // How we sort all seeds based on their values
-    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p1.value < p2.value; };
-    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p2.value < p1.value; };
-    if (_cache_rakeBiasStrength < 0)
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
-    else
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p1.value < p2.value; };
+    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p2.value < p1.value; };
+    if (_cache_rakeBiasStrength < 0) {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
+    } else {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    }
 
     seeds.resize(numOfSeedsNeeded);    // We only take first chunck of seeds that we need
-    for (auto &e : seeds)              // reset the value field of each particle
-        e.value = 0.0f;
+    seeds.shrink_to_fit();             // Free up some memory
+    for (auto &e : seeds) {            // reset the value field of each particle
+        e.value = 0.0;
+    }
 
     // If in unsteady case and there are multiple seed injections, we insert more seeds.
     if (!_cache_isSteady && _cache_seedInjInterval > 0) {
