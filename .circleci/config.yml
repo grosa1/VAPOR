@@ -198,12 +198,12 @@ jobs:
             f="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             f=$f$sha$endl
-            g="CentOS:    "
-            sha=`shasum -a 256 VAPOR3*CentOS7*`
-            g=$g$sha$endl
-            h="OSX:       "
-            sha=`shasum -a 256 VAPOR3*Darwin*`
-            h=$h$sha$endl
+            #g="CentOS:    "
+            #sha=`shasum -a 256 VAPOR3*CentOS7*`
+            #g=$g$sha$endl
+            #h="OSX:       "
+            #sha=`shasum -a 256 VAPOR3*Darwin*`
+            #h=$h$sha$endl
             #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
             message="$e$f$g$h"
             echo $message > "/tmp/workspace/installers/sha256_for_"${time}
