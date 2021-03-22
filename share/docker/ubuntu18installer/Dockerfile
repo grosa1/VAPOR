@@ -1,10 +1,12 @@
-from ubuntu:16.04
+from ubuntu:18.04
 
 #################################
 #                               #
 # Vapor configuration and build #
 #                               #
 #################################
+
+RUN ls
 
 RUN apt-get update \
     && apt-get install -y curl \
@@ -18,38 +20,37 @@ RUN apt-get update \
 # Aren't we supposed to be distributing libexpat in our third-party tar???
     && apt-get install -y libexpat1-dev \
     && apt-get install -y libglib2.0-0 \
-    && apt-get install -y libdbus-1-3
+    && apt-get install -y libdbus-1-3 \
+    && apt-get install -y valgrind \
+    && apt-get install -y clang-tidy 
 
+# Acquire 3rd party libraries
+#
 RUN mkdir -p /usr/local/VAPOR-Deps
-
-#Hack to download a file from google drive
-RUN fileid="18KtuXQsy2J7pFvvZe0Ug-yjnEmlPiE2p" \
-    && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
+#RUN fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
+RUN fileid="1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd" \
+    && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu-Mar.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
-
 RUN chmod -R 777 /usr
-
-RUN ls -lrth /usr/local/VAPOR-Deps/
-
-RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
+RUN chown -R root:root /usr
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu-Mar.tar.xz \ 
     -C /usr/local/VAPOR-Deps \
     && chown -R root:root /usr
-
 RUN chmod -R 777 /usr
 
-RUN ls -lrth /usr/local/VAPOR-Deps/2019-Aug
+#RUN ls -lrth /usr/local/VAPOR-Deps/2019-Aug
 
 RUN cd / \
-    && git clone https://github.com/NCAR/VAPOR.git \
-    && cd VAPOR \
+    && git clone https://github.com/NCAR/VAPOR.git /root/project \
+    && cd /root/project \
     && cp site_files/site.NCAR site.local \
     && mkdir build
 
-RUN cd /VAPOR/build \
+RUN cd /root/project/build \
     && export CMAKE_CXX_COMPILER=g++ \
     && cmake .. && make
 
-WORKDIR /VAPOR
+WORKDIR /root/project
