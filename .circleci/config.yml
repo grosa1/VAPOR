@@ -13,7 +13,7 @@ references:
 jobs:
   build_ubuntu18_installer:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      - image: sgpearse/vapor3-ubuntu18installer:latest
 
     steps:
       - checkout
