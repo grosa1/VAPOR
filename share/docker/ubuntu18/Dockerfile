@@ -25,15 +25,16 @@ RUN apt-get update \
 # Acquire 3rd party libraries
 #
 RUN mkdir -p /usr/local/VAPOR-Deps
-RUN fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
-    && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
+#RUN fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
+RUN fileid="1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd" \
+    && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu-Mar.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
 RUN chmod -R 777 /usr
 RUN chown -R root:root /usr
-RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu-Mar.tar.xz \ 
     -C /usr/local/VAPOR-Deps \
     && chown -R root:root /usr
 RUN chmod -R 777 /usr
