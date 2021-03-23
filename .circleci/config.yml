@@ -202,7 +202,7 @@ jobs:
             #cent="VAPOR3-$version-CentOS7-Weekly.sh"
             #mv $cent ${cent/Weekly/$time}
             win="VAPOR3-$version-win64-Weekly.exe"
-            mv $win ${win64/Weekly/$time}
+            mv $win ${win/Weekly/$time}
             brew install ghr
             endl=$'\n'
             e="sha 256"$endl
