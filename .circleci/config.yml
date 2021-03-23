@@ -201,7 +201,8 @@ jobs:
             #mv $osx ${osx/Weekly/$time}
             #cent="VAPOR3-$version-CentOS7-Weekly.sh"
             #mv $cent ${cent/Weekly/$time}
-            win="VAPOR3-$version-win64-Weekly.exe"
+            ls
+            win="VAPOR3-$version-win64.exe"
             mv $win ${win/win64/win64-$time}
             brew install ghr
             endl=$'\n'
