@@ -138,7 +138,8 @@ jobs:
           command: |
             Copy-Item site_files\* -Destination .
             git checkout main
-            git pull --no-commit && git commit --allow-empty -m "Merge"
+            git pull --no-commit 
+            git commit --allow-empty -m "Merge"
             git reset --hard origin/main
             mkdir build
             cd build
