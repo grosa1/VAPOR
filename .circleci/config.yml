@@ -137,14 +137,15 @@ jobs:
           name: Build Vapor
           command: |
             Copy-Item site_files\* -Destination .
-            git pull
-            git checkout $CIRCLE_BRANCH
+            git checkout main
+            git pull --no-commit && git commit --allow-empty -m "Merge"
+            git reset --hard origin/main
             mkdir build
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
-            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers\VAPOR3-3.2.0-win64-Weekly.exe
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
           no_output_timeout: 45m
 
       - persist_to_workspace:
@@ -195,6 +196,10 @@ jobs:
             time=`date +"%d_%m_%y-%H:%M"`
             ubu="VAPOR3-$version-Ubuntu18-Weekly.sh"
             mv $ubu ${ubu/Weekly/$time}
+            osx="VAPOR3-3.3.0-Darwin-Weekly.dmg"
+            mv $osx ${osx/Weekly/$time}
+            cent="VAPOR3-3.3.0-CentOS7-Weekly.sh"
+            mv $cent ${cent/Weekly/$time}
             brew install ghr
             endl=$'\n'
             e="sha 256"$endl
@@ -216,16 +221,16 @@ jobs:
 workflows:
   installers:
     jobs:
-      - build_ubuntu18_installer
-      - build_centos7_installer
-      - build_osx_installer
+#      - build_ubuntu18_installer
+#      - build_centos7_installer
+#      - build_osx_installer
       - build_win10_installer
 #          filters:
 #            branches:
 #              only: installers
       - release_preInstallers:
           requires:
-            - build_ubuntu18_installer
-            - build_centos7_installer
-            - build_osx_installer
+#            - build_ubuntu18_installer
+#            - build_centos7_installer
+#            - build_osx_installer
             - build_win10_installer
