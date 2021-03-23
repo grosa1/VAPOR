@@ -190,7 +190,7 @@ jobs:
           name: publish release
           command: |
             version=<< pipeline.parameters.vaporVersion >>
-            tag="$version_PreRelease"
+            tag="${version}_PreRelease"
             cd /tmp/workspace/installers
             time=`date +"%d_%m_%y-%H:%M"`
             ubu="VAPOR3-$version-Ubuntu18-Weekly.sh"
@@ -201,6 +201,13 @@ jobs:
             f="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             f=$f$sha$endl
+            #g="CentOS:    "
+            #sha=`shasum -a 256 VAPOR3*CentOS7*`
+            #g=$g$sha$endl
+            #h="OSX:       "
+            #sha=`shasum -a 256 VAPOR3*Darwin*`
+            #h=$h$sha$endl
+            #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
             message="$e$f$g$h"
             echo $message > "/tmp/workspace/installers/sha256_for_"${time}
             ghr -b "Installers are timestamped with the unix command date + \"%d_%m_%y-%H:%M\"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace ${tag} /tmp/workspace/installers
