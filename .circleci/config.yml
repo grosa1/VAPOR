@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  vaporVersion:
+    type: string
+    default: "3.4.0"
+
 orbs:
   win: circleci/windows@2.2.0
 
@@ -186,7 +191,7 @@ jobs:
           command: |
             cd /tmp/workspace/installers
             time=`date +"%d_%m_%y-%H:%M"`
-            ubu="VAPOR3-3.4.0-Ubuntu18-Weekly.sh"
+            ubu="VAPOR3-<< pipeline.parameters.vaporVersion >>-Ubuntu18-Weekly.sh"
             mv $ubu ${ubu/Weekly/$time}
             brew install ghr
             endl=$'\n'
