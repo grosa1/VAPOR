@@ -185,7 +185,7 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
     }
 
     if (!pathExists(path)) {
-        MyBase::SetDiagMsg("GetAppPath() return : empty (path does not exist)");
+        MyBase::SetDiagMsg("GetAppPath() return : empty (path %s does not exist)", path._cstr());
         return ("");
     }
 
