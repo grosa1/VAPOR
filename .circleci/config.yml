@@ -140,7 +140,7 @@ jobs:
             git checkout main
             git pull --no-commit 
             git commit --allow-empty -m "Merge"
-            git reset --hard origin/main
+            git reset --hard origin/winDebug
             mkdir build
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 16 2019' -A x64
