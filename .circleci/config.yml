@@ -147,6 +147,13 @@ jobs:
             git reset --hard origin/winDebug
           shell: bash.exe
       - run:
+          name: dos2unix
+          command: |
+            dos2unix /c/Users/circleci/project/share/shaders/*
+            dos2unix /c/Users/circleci/project/share/shaders/main
+            dos2unix /c/Users/circleci/project/share/shaders/includes
+          shall: bash.exe 
+      - run:
           name: Build Vapor
           command: |
             Copy-Item site_files\* -Destination .
