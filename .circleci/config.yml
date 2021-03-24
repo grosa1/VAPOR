@@ -207,17 +207,17 @@ jobs:
             brew install ghr
             endl=$'\n'
             e="sha 256"$endl
-            f="Ubuntu18:  "
-            sha=`shasum -a 256 VAPOR3*Ubuntu*`
-            f=$f$sha$endl
+            #f="Ubuntu18:  "
+            #sha=`shasum -a 256 VAPOR3*Ubuntu*`
+            #f=$f$sha$endl
             #g="CentOS:    "
             #sha=`shasum -a 256 VAPOR3*CentOS7*`
             #g=$g$sha$endl
             #h="OSX:       "
             #sha=`shasum -a 256 VAPOR3*Darwin*`
             #h=$h$sha$endl
-            #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
-            message="$e$f$g$h"
+            i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
+            message="$e$f$g$h$i"
             echo $message > "/tmp/workspace/installers/sha256_for_"${time}
             ghr -b "Installers are timestamped with the unix command date + \"%d_%m_%y-%H:%M\"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace ${tag} /tmp/workspace/installers
 
