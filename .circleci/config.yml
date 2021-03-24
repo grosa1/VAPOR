@@ -147,7 +147,7 @@ jobs:
             dos2unix /c/Users/circleci/project/share/shaders/*
             dos2unix /c/Users/circleci/project/share/shaders/main
             dos2unix /c/Users/circleci/project/share/shaders/includes
-          shall: bash.exe 
+          shell: bash.exe 
       - run:
           name: Build Vapor
           command: |
