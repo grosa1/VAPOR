@@ -113,11 +113,6 @@ jobs:
           paths: 
             - installers
 
-  build_win10_installer2:
-    executor: win/default
-    steps:
-      - checkout
-
   build_win10_installer:
     executor: win/default
     steps:
@@ -244,7 +239,7 @@ workflows:
       #- build_ubuntu18_installer
       #- build_centos7_installer
       #- build_osx_installer
-      - build_win10_installer2
+      - build_win10_installer
 #          filters:
 #            branches:
 #              only: installers
@@ -253,4 +248,4 @@ workflows:
             #- build_ubuntu18_installer
             #- build_centos7_installer
             #- build_osx_installer
-            #- build_win10_installer
+            - build_win10_installer
