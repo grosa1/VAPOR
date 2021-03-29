@@ -127,6 +127,8 @@ public:
 
     std::string GetSettingsPath() const;
 
+    static const string UseAllCoresTag;
+
 private:
     static const string _classType;
     static const string _shortName;
@@ -158,6 +160,7 @@ private:
     static const string _settingsNeedsWriteTag;
 
     bool _loadFromSettingsFile();
+    void _swapTildeWithHome(std::string &file) const;
 
     string _settingsPath;
 };
