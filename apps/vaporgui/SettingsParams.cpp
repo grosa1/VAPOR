@@ -139,11 +139,12 @@ void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
-void SettingsParams::_swapTildeWithHome( std::string& file ) const {
+void SettingsParams::_swapTildeWithHome(std::string &file) const
+{
     size_t pos = 0;
-    while((pos = file.find("~", pos)) != std::string::npos) {
-         file.replace(pos, 1, QDir::homePath().toStdString() );
-         pos += 1;
+    while ((pos = file.find("~", pos)) != std::string::npos) {
+        file.replace(pos, 1, QDir::homePath().toStdString());
+        pos += 1;
     }
 }
 
@@ -232,7 +233,7 @@ string SettingsParams::GetAutoSaveSessionFile() const
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
 
-    _swapTildeWithHome( file );
+    _swapTildeWithHome(file);
 
     return file;
 }
@@ -247,7 +248,7 @@ string SettingsParams::GetSessionDir() const
 {
     string defaultDir = GetDefaultSessionDir();
     string dir = GetValueString(_sessionDirTag, defaultDir);
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -256,7 +257,7 @@ void SettingsParams::SetSessionDir(string name) { SetValueString(_sessionDirTag,
 string SettingsParams::GetDefaultSessionDir() const
 {
     string dir = GetValueString(_defaultSessionDirTag, string("."));
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -276,7 +277,7 @@ string SettingsParams::GetMetadataDir() const
 {
     string defaultDir = GetDefaultMetadataDir();
     string dir = GetValueString(_metadataDirTag, defaultDir);
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -285,7 +286,7 @@ void SettingsParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag
 string SettingsParams::GetDefaultMetadataDir() const
 {
     string dir = GetValueString(_defaultMetadataDirTag, string("."));
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -299,7 +300,7 @@ string SettingsParams::GetTFDir() const
 {
     string defaultDir = GetDefaultTFDir();
     string dir = GetValueString(_tfDirTag, defaultDir);
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -308,7 +309,7 @@ void SettingsParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans
 string SettingsParams::GetDefaultTFDir() const
 {
     string dir = GetValueString(_defaultTfDirTag, string(""));
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -322,7 +323,7 @@ string SettingsParams::GetFlowDir() const
 {
     string defaultDir = GetDefaultFlowDir();
     string dir = GetValueString(_flowDirTag, defaultDir);
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -331,7 +332,7 @@ void SettingsParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set f
 string SettingsParams::GetDefaultFlowDir() const
 {
     string dir = GetValueString(_defaultFlowDirTag, string("."));
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -341,7 +342,7 @@ string SettingsParams::GetPythonDir() const
 {
     string defaultDir = GetDefaultPythonDir();
     string dir = GetValueString(_pythonDirTag, defaultDir);
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -350,7 +351,7 @@ void SettingsParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "s
 string SettingsParams::GetDefaultPythonDir() const
 {
     string dir = GetValueString(_defaultPythonDirTag, string("."));
-    _swapTildeWithHome( dir );
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
