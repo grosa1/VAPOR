@@ -88,7 +88,7 @@ int Visualizer::resizeGL(int wid, int ht) { return 0; }
 
 int Visualizer::_getCurrentTimestep() const
 {
-    vector<string> dataSetNames = _paramsMgr->GetDataMgrNames();
+    vector<string> dataSetNames = _dataStatus->GetDataMgrNames();
 
     bool   first = true;
     size_t min_ts = 0;
@@ -138,13 +138,14 @@ void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 
     MatrixManager *mm = _glManager->matrixManager;
 
-    mm->Translate(translations[0], translations[1], translations[2]);
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
     mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
     mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
     mm->Scale(scales[0], scales[1], scales[2]);
     mm->Translate(-origin[0], -origin[1], -origin[2]);
+
+    mm->Translate(translations[0], translations[1], translations[2]);
 }
 
 int Visualizer::paintEvent(bool fast)
@@ -220,6 +221,8 @@ int Visualizer::paintEvent(bool fast)
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
     _renderColorbars(_getCurrentTimestep());
+    GL_ERR_BREAK();
+    _vizFeatures->DrawAxisArrows();
     GL_ERR_BREAK();
 
     //    _glManager->ShowDepthBuffer();
@@ -517,8 +520,8 @@ int Visualizer::_captureImage(std::string path)
     if (writer == nullptr) goto captureImageEnd;
 
     if (geoTiffOutput) {
-        VAssert(_paramsMgr->GetDataMgrNames().size());
-        string projString = _dataStatus->GetDataMgr(_paramsMgr->GetDataMgrNames()[0])->GetMapProjection();
+        VAssert(_dataStatus->GetDataMgrNames().size());
+        string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
         vector<double> dataMinExtents, dataMaxExtents;
         _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);

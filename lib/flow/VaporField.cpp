@@ -383,22 +383,6 @@ void VaporField::AssignDataManager(VAPoR::DataMgr *dmgr)
     for (size_t i = 0; i < timeCoords.size(); i++) _timestamps[i] = timeCoords[i];
 }
 
-void VaporField::UpdateParamAndVarNames(const VAPoR::FlowParams *p)
-{
-    _params = p;
-
-    // Update properties of this Field
-    IsSteady = p->GetIsSteady();
-    ScalarName = p->GetColorMapVariableName();
-    auto velNames = p->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        if (i < velNames.size())
-            VelocityNames[i] = velNames.at(i);
-        else
-            VelocityNames[i] = "";    // make sure it keeps an empty string,
-    }                                 // instead of whatever left from before.
-}
-
 void VaporField::UpdateParams(const VAPoR::FlowParams *p)
 {
     _params = p;
@@ -465,11 +449,6 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
                 counter++;
             }
 
-    // Let's find the maximum velocity on these sampled locations
-    // Note that we want the velocity without a multiplier, which will be the value
-    // returned by GetVelocity() divided by the velocity multiplier.
-    float mult = _params->GetVelocityMultiplier();
-    if (mult == 0.0f) mult = 1.0f;
     float     maxmag = 0.0f;
     glm::vec3 vel;
     for (long i = 0; i < totalSamples; i++) {
@@ -481,7 +460,6 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
         else if (rv != 0)
             return rv;
         else {
-            vel /= mult;    // Restore the raw velocity values
             auto mag = glm::length(vel);
             if (mag > maxmag) maxmag = mag;
         }
@@ -495,9 +473,21 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     }
 
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES
-    // a particle needs 500 steps to travel the entire space.
-    const float desiredNum = 500.0f;
-    const float actualNum = glm::distance(minxyz, maxxyz) / maxmag;
+    //   a particle needs 1000 steps (in case of unstructured grids) or
+    //   twice the domain dimension (in case of structured grids)
+    //   to travel the entire space.
+    double desiredNum = 1000.0;    // pre-defined value for unstructured grids
+
+    const auto *grid = _getAGrid(currentTS, VelocityNames[0]);
+    const auto *structuredGrid = dynamic_cast<const VAPoR::StructuredGrid *>(grid);
+    if (structuredGrid) {
+        auto dims = structuredGrid->GetDimensions();
+        assert(dims.size() == 3);
+        double numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1] + dims[2] * dims[2]));
+        desiredNum = 2.0 * numCellsDiagnal;
+    }
+
+    const double actualNum = double(glm::distance(minxyz, maxxyz)) / double(maxmag);
     delT = actualNum / desiredNum;
 
     return 0;

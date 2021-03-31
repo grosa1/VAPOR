@@ -1,5 +1,6 @@
 #include "vapor/FlowParams.h"
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace VAPoR;
 
@@ -76,6 +77,10 @@ FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave) :
     SetValueDouble(PhongDiffuseTag, "", 0.8);
     SetValueDouble(PhongSpecularTag, "", 0);
     SetValueDouble(PhongShininessTag, "", 2);
+
+    // Give the random bias variable the same as color mapping variable.
+    auto colorvar = GetColorMapVariableName();
+    SetValueString(_rakeBiasVariable, "which variable to bias with", colorvar);
 }
 
 FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *node) : RenderParams(dataManager, stateSave, node, 3 /* max dim */)
@@ -125,13 +130,14 @@ int FlowParams::Initialize()
 
     SetFlowDirection((int)FlowDir::FORWARD);
     SetSteadyNumOfSteps(100);
-    SetVelocityMultiplier(1);
+    SetVelocityMultiplier(1.0);
     SetPeriodic(vector<bool>(3, false));
-    SetGridNumOfSeeds(vector<long>(3, 5));
+    SetGridNumOfSeeds({5, 5, 1});
     SetRandomNumOfSeeds(50);
     SetFlowlineOutputFilename(Wasp::FileUtils::HomeDir() + "/VaporFlow.txt");
+    SetSeedInputFilename(Wasp::GetSharePath("examples/listOfSeeds.txt"));
     SetIsSteady(true);
-    SetPastNumOfTimeSteps(_dataMgr->GetNumTimeSteps());
+    SetPastNumOfTimeSteps(std::max(_dataMgr->GetNumTimeSteps() - 1, 1));
 
     return (0);
 }
@@ -309,9 +315,9 @@ std::string FlowParams::GetRakeBiasVariable() const
 
 void FlowParams::SetRakeBiasVariable(const std::string &varname) { SetValueString(_rakeBiasVariable, "which variable to bias with", varname); }
 
-float FlowParams::GetRakeBiasStrength() const { return float(GetValueDouble(_rakeBiasStrength, 0.0f)); }
+long FlowParams::GetRakeBiasStrength() const { return (GetValueLong(_rakeBiasStrength, 0)); }
 
-void FlowParams::SetRakeBiasStrength(float strength) { SetValueDouble(_rakeBiasStrength, "bias strength", strength); }
+void FlowParams::SetRakeBiasStrength(long strength) { SetValueLong(_rakeBiasStrength, "bias strength", strength); }
 
 int FlowParams::GetPastNumOfTimeSteps() const
 {

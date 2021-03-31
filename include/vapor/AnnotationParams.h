@@ -90,24 +90,14 @@ public:
 
     AxisAnnotation *GetAxisAnnotation();
 
-    void                SetAxisArrowCoords(std::vector<double> coords);
-    std::vector<double> GetAxisArrowCoords() const;
-
-    void SetXAxisArrowPosition(float pos);
-    void SetYAxisArrowPosition(float pos);
-    void SetZAxisArrowPosition(float pos);
-
-    bool GetShowAxisArrows() const;
-    void SetShowAxisArrows(bool val);
-
     void SetAxisFontSize(int size);
     int  GetAxisFontSize();
 
-    int  GetTimeLLX() const;
-    void SetTimeLLX(int llx);
+    double GetTimeLLX() const;
+    void   SetTimeLLX(double llx);
 
-    int  GetTimeLLY() const;
-    void SetTimeLLY(int lly);
+    double GetTimeLLY() const;
+    void   SetTimeLLY(double lly);
 
     std::vector<double>       GetTimeColor() const;
     template<typename T> void GetTimeColor(T color[]) const { m_getColor(color, _timeColorTag); };
@@ -119,11 +109,28 @@ public:
     int  GetTimeSize() const;
     void SetTimeSize(int size);
 
+
+    bool   GetAxisArrowEnabled() const;
+    double GetAxisArrowSize() const;
+    double GetAxisArrowXPos() const;
+    double GetAxisArrowYPos() const;
+
+    void SetAxisArrowEnabled(bool enabled);
+    void SetAxisArrowSize(double pos);
+    void SetAxisArrowXPos(double pos);
+    void SetAxisArrowYPos(double pos);
+
     static string GetClassType() { return ("AnnotationParams"); }
+
+    static const string AxisArrowSizeTag;
+    static const string AxisArrowXPosTag;
+    static const string AxisArrowYPosTag;
+    static const string AxisArrowEnabledTag;
 
 private:
     ParamsContainer *_axisAnnotations;
 
+public:
     static const string _domainColorTag;
     static const string _domainFrameTag;
     static const string _regionFrameTag;
@@ -145,8 +152,6 @@ private:
     static const string _axisAnnotationsTag;
     static const string _latLonAxesTag;
 
-    static const string   _axisArrowCoordsTag;
-    static const string   _showAxisArrowsTag;
     static const string   _currentAxisDataMgrTag;
     static vector<double> _previousStretch;
 
@@ -158,6 +163,7 @@ private:
 
     static const string _projStringTag;
 
+private:
     void _init();
 
     template<typename T> void m_getColor(T color[3], string tag) const
