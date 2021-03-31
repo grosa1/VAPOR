@@ -2,6 +2,7 @@
 #include "vapor/ContourParams.h"
 #include "PWidgets.h"
 #include "PSliderEditHLI.h"
+#include "PConstantColorWidget.h"
 
 using namespace VAPoR;
 typedef ContourParams CP;
@@ -10,25 +11,33 @@ static RenderEventRouterRegistrar<ContourEventRouter> registrar(ContourEventRout
 
 ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, ContourParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection",
-                                                    {
-                                                        new PScalarVariableSelector,
-                                                        new PHeightVariableSelector,
-                                                    }),
-                                       new PFidelitySection}));
+    // clang-format off
 
-    AddSubtab("Appearance", new PGroup({
-                                new PTFEditor,
-                                new PSection("Contour Lines",
-                                             {
-                                                 _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
-                                                 (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
-                                                 _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
-                                             }),
-                            }));
+    AddVariablesSubtab(new PGroup({
+        new PSection("Variable Selection", {
+            new PScalarVariableSelector,
+            new PHeightVariableSelector,
+        }),
+        new PFidelitySection
+    }));
+    
+    AddAppearanceSubtab(new PGroup({
+        new PTFEditor(RenderParams::_variableNameTag, {
+            PTFEditor::Default,
+            PTFEditor::RegularIsoArray
+        }),
+        new PSection("Contour Lines", {
+            _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
+            (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
+            _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
+            new PConstantColorWidget
+        }),
+    }));
+    
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
-    AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    // clang-format on
 }
 
 void ContourEventRouter::_updateTab()

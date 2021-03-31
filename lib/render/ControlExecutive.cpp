@@ -492,8 +492,6 @@ void ControlExec::CloseData(string dataSetName)
 {
     if (!_dataStatus->GetDataMgr(dataSetName)) return;
 
-    _dataStatus->Close(dataSetName);
-
     // Remove any renderers associated with this data set
     //
     vector<string> winNames = GetVisualizerNames();
@@ -511,6 +509,13 @@ void ControlExec::CloseData(string dataSetName)
     }
 
     _paramsMgr->RemoveDataMgr(dataSetName);
+
+    // Rebuild the calculation engine from params database after removing
+    // the data set from the params database.
+    //
+    _calcEngineMgr->ReinitFromState();
+
+    _dataStatus->Close(dataSetName);
 
     UndoRedoClear();
 }
@@ -799,10 +804,32 @@ int ControlExec::DrawText(string winName, string text, int x, int y, int size, f
     return 0;
 }
 
+int ControlExec::DrawTextNormalizedCoords(string winName, string text, float x, float y, int size, float color[3], int type)
+{
+    Visualizer *v = getVisualizer(winName);
+    if (v == NULL) {
+        string msg = "Could not get Visualizer " + winName;
+        SetErrMsg(msg.c_str());
+        return -1;
+    }
+
+    v->DrawTextNormalizedCoords(text, x, y, size, color, type);
+
+    return 0;
+}
+
 int ControlExec::DrawText(string text, int x, int y, int size, float color[3], int type)
 {
     vector<string> visNames = GetVisualizerNames();
     for (int i = 0; i < visNames.size(); i++) { DrawText(visNames[i], text, x, y, size, color, type); }
+
+    return 0;
+}
+
+int ControlExec::DrawTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type)
+{
+    vector<string> visNames = GetVisualizerNames();
+    for (int i = 0; i < visNames.size(); i++) { DrawTextNormalizedCoords(visNames[i], text, x, y, size, color, type); }
 
     return 0;
 }
