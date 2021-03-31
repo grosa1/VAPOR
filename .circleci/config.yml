@@ -239,8 +239,8 @@ jobs:
             releaseMessage="\"Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"\""
             shaMessage="$e$f$g$h$i"
             echo $shaMessage > "/tmp/workspace/installers/sha256_for_"${time}
-            echo "ghr -b "\"Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"\"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} ${tag} /tmp/workspace/installers"
-            ghr -b "\"Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"\"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} ${tag} /tmp/workspace/installers
+            echo ghr -b "Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"" -t ${G    ITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} ${tag} /tmp/workspace/installers
+            ghr -b "Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} ${tag} /tmp/workspace/installers
 
 
 workflows:
