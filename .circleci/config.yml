@@ -236,11 +236,11 @@ jobs:
             #sha=`shasum -a 256 VAPOR3*Darwin*`
             #h=$h$sha$endl
             #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
-            releaseMessage="\"Installers are timestamped with the unix command date + \"%d_%m_%y-%H:%M\"\r\nInstalles built on commit "${hash}"\""
+            releaseMessage="\"Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"\""
             shaMessage="$e$f$g$h$i"
             echo $shaMessage > "/tmp/workspace/installers/sha256_for_"${time}
             echo "ghr -b ${releaseMessage} -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace ${tag} /tmp/workspace/installers"
-            ghr -b ${releaseMessage} -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace ${tag} /tmp/workspace/installers
+            ghr -b ${releaseMessage} -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} ${tag} /tmp/workspace/installers
 
 
 workflows:
