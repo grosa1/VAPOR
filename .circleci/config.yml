@@ -27,7 +27,6 @@ jobs:
           name: make installer
           command: |
             cd /root/project/build
-            git branch --set-upstream-to=origin/installers installers
             git pull
             git checkout main
             git reset --hard origin/main
@@ -54,7 +53,6 @@ jobs:
           name: cmake3 and make
           command: |
             cd /root/project/build
-            git branch --set-upstream-to=origin/installers installers
             git pull
             git checkout main
             git reset --hard origin/main
@@ -139,7 +137,7 @@ jobs:
             git checkout main
             git pull --no-commit 
             git commit --allow-empty -m "Merge"
-            git reset --hard origin/winDebug
+            git reset --hard origin/main
           shell: bash.exe
       - run:
           name: dos2unix
