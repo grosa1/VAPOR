@@ -27,6 +27,7 @@ jobs:
           name: make installer
           command: |
             cd /root/project/build
+            git branch --set-upstream-to=origin/weekly weekly
             git pull
             git checkout main
             git reset --hard origin/main
@@ -53,6 +54,7 @@ jobs:
           name: cmake3 and make
           command: |
             cd /root/project/build
+            git branch --set-upstream-to=origin/weekly weekly
             git pull
             git checkout main
             git reset --hard origin/main
