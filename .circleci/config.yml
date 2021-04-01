@@ -198,9 +198,9 @@ jobs:
             a="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             ubuntuSha=$a$sha$endl
-            #os="CentOS:    "
-            #sha=`shasum -a 256 VAPOR3*CentOS7*`
-            #centosSha=$os$sha$endl
+            os="CentOS:    "
+            sha=`shasum -a 256 VAPOR3*CentOS7*`
+            centosSha=$os$sha$endl
             #os="OSX:       "
             #sha=`shasum -a 256 VAPOR3*Darwin*`
             #osxSha=$os$sha$endl
