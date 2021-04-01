@@ -216,21 +216,21 @@ jobs:
 
 workflows:
   weekly:
-    triggers:
-      - schedule:
-           cron: "30 19 * * 4" # Thursday @ 15:30 UTC (Mountain Daylight Time +7)
-                # * * * * * 
-                # | | | | |  
-                # | | | | | 
-                # | | | | +---- Day of the Week   (range: 1-7, 1 standing for Monday)
-                # | | | +------ Month of the Year (range: 1-12)
-                # | | +-------- Day of the Month  (range: 1-31)
-                # | +---------- Hour              (range: 0-23)
-                # +------------ Minute            (range: 0-59)
-           filters:
-             branches:
-               only:
-                 - weekly
+    #triggers:
+    #  - schedule:
+    #       cron: "30 19 * * 4" # Thursday @ 15:30 UTC (Mountain Daylight Time +7)
+    #            # * * * * * 
+    #            # | | | | |  
+    #            # | | | | | 
+    #            # | | | | +---- Day of the Week   (range: 1-7, 1 standing for Monday)
+    #            # | | | +------ Month of the Year (range: 1-12)
+    #            # | | +-------- Day of the Month  (range: 1-31)
+    #            # | +---------- Hour              (range: 0-23)
+    #            # +------------ Minute            (range: 0-59)
+    #       filters:
+    #         branches:
+    #           only:
+    #             - weekly
     jobs:
       - build_ubuntu18_installer
     #  - build_centos7_installer
