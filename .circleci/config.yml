@@ -198,15 +198,15 @@ jobs:
             a="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             ubuntuSha=$a$sha$endl
-            os="CentOS:    "
-            sha=`shasum -a 256 VAPOR3*CentOS7*`
-            centosSha=$os$sha$endl
-            os="OSX:       "
-            sha=`shasum -a 256 VAPOR3*Darwin*`
-            osxSha=$os$sha$endl
-            os="Windows:   "
-            sha=`shasum -a 256 VAPOR3*win64*`
-            winSha=$os$sha$endl
+            #os="CentOS:    "
+            #sha=`shasum -a 256 VAPOR3*CentOS7*`
+            #centosSha=$os$sha$endl
+            #os="OSX:       "
+            #sha=`shasum -a 256 VAPOR3*Darwin*`
+            #osxSha=$os$sha$endl
+            #os="Windows:   "
+            #sha=`shasum -a 256 VAPOR3*win64*`
+            #winSha=$os$sha$endl
             shaMessage="$title$ubuntuSha$centosSha$osxSha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
