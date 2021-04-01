@@ -165,7 +165,7 @@ jobs:
           paths: 
             - installers
 
-  weekly:
+  release_weekly_installers:
     macos:
       xcode: "12.4.0"
     steps:
@@ -209,7 +209,7 @@ jobs:
             sha=`shasum -a 256 VAPOR3*win64*`
             winSha=$os$sha$endl
             shaMessage="$title$ubuntuSha$centosSha$osxSha$winSha"
-            echo $shaMessage > "/tmp/workspace/installers/sha256.txt
+            echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
             echo ghr -b "Weely installers are untested an may not be stable.  Built on commit "${hash}"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             ghr -b "Installers are timestamped as %d_%m_%y-%H:%M, and are built on commit "${hash}"" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
