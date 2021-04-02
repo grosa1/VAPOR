@@ -215,13 +215,13 @@ jobs:
 
 workflows:
   version: 2
-  dummy:
-    jobs:
-      - dummy
+#  dummy:
+#    jobs:
+#      - dummy
   weekly:
     triggers:
       - schedule:
-           cron: "40 18 * * 5" # Friday @ 16:00 UTC (Mountain Daylight Time +7)
+           cron: "45 18 * * 5" # Friday @ 16:00 UTC (Mountain Daylight Time +7)
            filters:
              branches:
                only: weekly
