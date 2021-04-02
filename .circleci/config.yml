@@ -16,7 +16,7 @@ references:
       at: *workspace_root
 
 jobs:
-  dummy:
+  check_out:
     docker:
       - image: sgpearse/vapor3-ubuntu18installer:latest
 
@@ -215,9 +215,9 @@ jobs:
 
 workflows:
   version: 2
-#  dummy:
-#    jobs:
-#      - dummy
+  dummy:
+    jobs:
+      - check_out
   weekly:
     triggers:
       - schedule:
