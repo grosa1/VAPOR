@@ -207,6 +207,10 @@ jobs:
 
 
 workflows:
+  build:
+    jobs:
+      - build_ubuntu18
+      - build_centos7
   weekly:
     triggers:
       - schedule:
