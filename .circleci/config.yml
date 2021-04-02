@@ -184,14 +184,6 @@ jobs:
             hash=`git rev-parse HEAD`
             tag="Weekly"
             cd /tmp/workspace/installers
-            #ubu="VAPOR3-$version-Ubuntu18-Weekly.sh"
-            #mv $ubu ${ubu/Weekly/$time}
-            #osx="VAPOR3-$version-Darwin-Weekly.dmg"
-            #mv $osx ${osx/Weekly/$time}
-            #cent="VAPOR3-$version-CentOS7-Weekly.sh"
-            #mv $cent ${cent/Weekly/$time}
-            #win="VAPOR3-$version-win64.exe"
-            #mv $win ${win/win64/win64-$time}
             brew install ghr
             endl=$'\n'
             title="sha 256"$endl
@@ -210,35 +202,35 @@ jobs:
             shaMessage="$title$ubuntuSha$centosSha$osxSha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
-            echo ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(MM-DD-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
-            ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(MM-DD-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            echo ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-DD-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
 
 workflows:
   weekly:
-    #triggers:
-    #  - schedule:
-    #       cron: "30 19 * * 4" # Thursday @ 15:30 UTC (Mountain Daylight Time +7)
-    #            # * * * * * 
-    #            # | | | | |  
-    #            # | | | | | 
-    #            # | | | | +---- Day of the Week   (range: 1-7, 1 standing for Monday)
-    #            # | | | +------ Month of the Year (range: 1-12)
-    #            # | | +-------- Day of the Month  (range: 1-31)
-    #            # | +---------- Hour              (range: 0-23)
-    #            # +------------ Minute            (range: 0-59)
-    #       filters:
-    #         branches:
-    #           only:
-    #             - weekly
+    triggers:
+      - schedule:
+           cron: "30 13 * * 5" # Thursday @ 13:30 UTC (Mountain Daylight Time +7)
+                # * * * * * 
+                # | | | | |  
+                # | | | | | 
+                # | | | | +---- Day of the Week   (range: 1-7, 1 standing for Monday)
+                # | | | +------ Month of the Year (range: 1-12)
+                # | | +-------- Day of the Month  (range: 1-31)
+                # | +---------- Hour              (range: 0-23)
+                # +------------ Minute            (range: 0-59)
+           filters:
+             branches:
+               only:
+                 - weekly
     jobs:
       - build_ubuntu18_installer
       - build_centos7_installer
-    #  - build_osx_installer
-    #  - build_win10_installer
+      - build_osx_installer
+      - build_win10_installer
       - release_weekly_installers:
           requires:
             - build_ubuntu18_installer
             - build_centos7_installer
-    #        - build_osx_installer
-    #        - build_win10_installer
+            - build_osx_installer
+            - build_win10_installer
