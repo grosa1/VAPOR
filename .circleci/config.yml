@@ -16,6 +16,13 @@ references:
       at: *workspace_root
 
 jobs:
+  dummy:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18installer:latest
+
+    steps:
+      - checkout
+
   build_ubuntu18_installer:
     docker:
       - image: sgpearse/vapor3-ubuntu18installer:latest
@@ -207,7 +214,10 @@ jobs:
 
 
 workflows:
-  build:
+  dummy:
+    jobs:
+      - dummy
+  weekly:
     triggers:
       - schedule:
            cron: "30 14 * * 5" # Friday @ 14:30 UTC (Mountain Daylight Time +7)
