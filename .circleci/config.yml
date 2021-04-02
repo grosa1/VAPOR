@@ -215,7 +215,7 @@ jobs:
 
 workflows:
   version: 2
-  dummy:
+  check_out:
     jobs:
       - check_out
   weekly:
