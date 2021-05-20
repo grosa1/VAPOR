@@ -18,6 +18,7 @@ if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` =
 else
     COMPARE_BRANCH=$BRANCH
 fi
+echo "Comparing current changes with branch: $COMPARE_BRANCH"
 
 # If we're on the readTheDocs branch, skip clang-format
 #
