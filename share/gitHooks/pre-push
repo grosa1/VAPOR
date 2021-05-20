@@ -36,7 +36,8 @@ else
             done
 
             if [ "$NUMBERS" != "" ]; then
-                if [ "$DRYRUN" != ""]; then
+                #if [ "$DRYRUN" != ""]; then
+                if [ ! $DRYRUN ]; then
                     clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
                 else
                     echo "  Running clang-format on $FILE"
@@ -47,7 +48,9 @@ else
         done
     done
 
-    git commit -m "clang-format pre-push hook"
+    if [ ! $DRYRUN ]; then
+        git commit -m "clang-format pre-push hook"
+    fi
 
     # git commit will return non-zero status if there's nothing to commit.  Make sure
     # we return 0 so git 'push' will still be invoked
