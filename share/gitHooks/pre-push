@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 
-while getopts dryRun flag
+while getopts 'dryRun' flag;
 do
     case "${flag}" in
-        dryRun) DRYRUN=${OPTARG};;
+        dryRun) DRYRUN='true' ;;
     esac
 done
 
@@ -37,7 +37,8 @@ else
 
             if [ "$NUMBERS" != "" ]; then
                 #if [ "$DRYRUN" != ""]; then
-                if [ ! $DRYRUN ]; then
+                if [ ! -z "${DRYRUN}" ]; then
+                    echo "dry run activated"
                     clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
                 else
                     echo "  Running clang-format on $FILE"
@@ -48,7 +49,9 @@ else
         done
     done
 
-    if [ ! $DRYRUN ]; then
+    if [ ! -z "${DRYRUN}" ]; then
+        echo "FOO"
+        echo ${DRYRUN}
         git commit -m "clang-format pre-push hook"
     fi
 
