@@ -86,7 +86,7 @@ jobs:
           name: run clang-format
           command: |
             cd /root/project
-            ./share/gitHooks/pre-push
+            ./share/gitHooks/pre-push -dryRun
             #for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
             #    for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
             #        NUMBERS=""
