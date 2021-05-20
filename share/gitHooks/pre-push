@@ -36,12 +36,12 @@ else
             done
 
             if [ "$NUMBERS" != "" ]; then
-                if [ "$DRYRUN" == ""]; then
+                if [ "$DRYRUN" != ""]; then
+                    clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                else
                     echo "  Running clang-format on $FILE"
                     clang-format -i $FILE $NUMBERS
                     git add $FILE
-                else
-                    clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
                 fi
             fi
         done
