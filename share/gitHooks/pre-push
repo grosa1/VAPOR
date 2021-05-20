@@ -1,16 +1,28 @@
 #!/bin/sh
 #
 
+while getopts 'dm' flag;
+do
+    case "${flag}" in
+        d) DRYRUN='true' ;;
+        m) MAIN='true' ;;
+    esac
+done
+
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 
 # If our current branch does not exist in the remote repository yet, then compare
 # our local changes with main.  Otherwise, compare our local changes with the remote
 # branch.
-if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` = 0 ]; then
-    COMPARE_BRANCH="main"
-else
-    COMPARE_BRANCH=$BRANCH
+if [ ! -z "${MAIN}" ]; then
+    if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` = 0 ]; then
+        COMPARE_BRANCH="main"
+    else
+        COMPARE_BRANCH=$BRANCH
+    fi
 fi
+
+echo "Comparing current changes with branch: $COMPARE_BRANCH"
 
 # If we're on the readTheDocs branch, skip clang-format
 #
@@ -29,14 +41,24 @@ else
             done
 
             if [ "$NUMBERS" != "" ]; then
-                echo "  Running clang-format on $FILE"
-                clang-format -i $FILE $NUMBERS
-                git add $FILE
+                #if [ "$DRYRUN" != ""]; then
+                if [ ! -z "${DRYRUN}" ]; then
+                    echo "dry run activated"
+                    clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                else
+                    echo "  Running clang-format on $FILE"
+                    clang-format -i $FILE $NUMBERS
+                    git add $FILE
+                fi
             fi
         done
     done
 
-    git commit -m "clang-format pre-push hook"
+    if [ ! -z "${DRYRUN}" ]; then
+        echo "FOO"
+        echo ${DRYRUN}
+        git commit -m "clang-format pre-push hook"
+    fi
 
     # git commit will return non-zero status if there's nothing to commit.  Make sure
     # we return 0 so git 'push' will still be invoked
