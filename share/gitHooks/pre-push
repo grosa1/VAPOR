@@ -1,6 +1,13 @@
 #!/bin/sh
 #
 
+while getopts dryRun flag
+do
+    case "${flag}" in
+        dryRun) DRYRUN=${OPTARG};;
+    esac
+done
+
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 
 # If our current branch does not exist in the remote repository yet, then compare
@@ -29,9 +36,13 @@ else
             done
 
             if [ "$NUMBERS" != "" ]; then
-                echo "  Running clang-format on $FILE"
-                clang-format -i $FILE $NUMBERS
-                git add $FILE
+                if [ "$DRYRUN" == ""]; then
+                    echo "  Running clang-format on $FILE"
+                    clang-format -i $FILE $NUMBERS
+                    git add $FILE
+                else
+                    clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                fi
             fi
         done
     done
