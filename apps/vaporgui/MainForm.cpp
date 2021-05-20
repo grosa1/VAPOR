@@ -35,6 +35,10 @@
 #include <functional>
 #include <cmath>
 
+
+
+
+
 #include <QDesktopWidget>
 #include <QDockWidget>
 #include <QMenuBar>
