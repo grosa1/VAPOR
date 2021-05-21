@@ -50,7 +50,7 @@ class QToolBar;
 class QWidget;
 class QDesktopWidget;
 class QMdiArea;
-class QDockWindow;
+  class QDockWindow;
 class QLabel;
 class QSpinBox;
 class ProgressStatusBar;
