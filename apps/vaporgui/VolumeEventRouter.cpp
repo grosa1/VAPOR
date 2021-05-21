@@ -20,7 +20,14 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
         }),
         new PFidelitySection
     }));
-    
+   
+
+
+
+
+
+
+ 
     AddAppearanceSubtab(new PGroup({
         (new PTFEditor)->ShowColormapBasedOnParam(VP::UseColormapVariableTag, false),
         new PSection("Rendering Method", {
