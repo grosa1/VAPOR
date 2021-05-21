@@ -37,11 +37,6 @@
 
 
 
-
-
-
-
-
 #include <QDesktopWidget>
 #include <QDockWidget>
 #include <QMenuBar>
