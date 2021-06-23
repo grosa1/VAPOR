@@ -1,9 +1,9 @@
 version: 2.1
 
-parameters:
-  vaporVersion:
-    type: string
-    default: "3.4.0"
+#parameters:
+#  vaporVersion:
+#    type: string
+#    default: "3.4.0"
 
 orbs:
   win: circleci/windows@2.2.0
@@ -37,6 +37,11 @@ jobs:
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
+
+      - run:
+          name: save version number
+          command: |
+            /root/project/build/bin/vaporversion -numeric > /tmp/workspace/installers/vaporVersion.txt
 
       - persist_to_workspace:
           root: *workspace_root
@@ -211,7 +216,8 @@ jobs:
           command: |
             cd /Users/distiller/project
             hash=`git rev-parse HEAD`
-            version=<< pipeline.parameters.vaporVersion >>
+            #version=<< pipeline.parameters.vaporVersion >>
+            version=$(cat /tmp/workspace/installers/vaporVersion.txt)
             tag="${version}_PreRelease"
             cd /tmp/workspace/installers
             time=`date +"%d_%m_%y-%H:%M"`
