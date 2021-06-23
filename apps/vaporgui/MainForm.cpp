@@ -65,6 +65,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DCP.h>
 #include <vapor/DCCF.h>
 
 #include "VizWinMgr.h"
@@ -83,6 +84,7 @@
 #include "windowsUtils.h"
 #include "ParamsWidgetDemo.h"
 #include "AppSettingsMenu.h"
+#include "CheckForUpdate.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -94,6 +96,7 @@
 #include <vapor/XmlNode.h>
 #include <vapor/Base16StringStream.h>
 #include "BookmarkParams.h"
+#include "NavigationUtils.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -318,7 +321,7 @@ public:
 
 // Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : QMainWindow(parent)
+MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, QWidget *parent) : QMainWindow(parent)
 {
     _initMembers();
 
@@ -395,6 +398,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     _tabMgr = new TabManager(this, _controlExec);
     _tabMgr->setUsesScrollButtons(true);
+
+    _animationController = new AnimationController(_controlExec);
 
     int dpi = qApp->desktop()->logicalDpiX();
     if (dpi > 96)
@@ -473,6 +478,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
+
+    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true)) CheckForUpdates();
 }
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
@@ -506,15 +513,15 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    _tabMgr->AnimationPlayForward();
+    _animationController->AnimationPlayForward();
     _paramsMgr->EndSaveStateGroup();
 
-    connect(_tabMgr, &TabManager::AnimationOnOffSignal, this, [this]() {
+    connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
         endAnimCapture();
         close();
     });
 
-    connect(_tabMgr, &TabManager::AnimationDrawSignal, this, [this]() { printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep()); });
+    connect(_animationController, &AnimationController::AnimationDrawSignal, this, [this]() { printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep()); });
 
     return 0;
 }
@@ -556,11 +563,40 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "wrf";
     else if (isDatasetValidFormat<DCMPAS>(paths))
         *fmt = "mpas";
+    else if (isDatasetValidFormat<DCP>(paths))
+        *fmt = "dcp";
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
     else
         return false;
     return true;
+}
+
+void MainForm::CheckForUpdates()
+{
+#ifndef NDEBUG
+    return;    // Don't check for updates in debug builds
+#endif
+
+    CheckForUpdate([this](bool updateAvailable, UpdateInfo info) {
+        if (!updateAvailable) return;
+
+        QCheckBox *cb = new QCheckBox("Automatically check for updates");
+        cb->setChecked(true);
+        QMessageBox popup;
+        popup.setText(QString::fromStdString("A newer version of Vapor is available: " + info.version));
+        QPushButton *get = popup.addButton("Get Latest Version", QMessageBox::ActionRole);
+        popup.addButton("Ok", QMessageBox::AcceptRole);
+        popup.setCheckBox(cb);
+
+        popup.exec();
+        if (popup.clickedButton() == get) info.OpenURL();
+
+        if (!cb->isChecked()) {
+            GetSettingsParams()->SetValueLong(SettingsParams::AutoCheckForUpdatesTag, "", false);
+            GetSettingsParams()->SaveSettings();
+        }
+    });
 }
 
 void MainForm::_createAnimationToolBar()
@@ -609,12 +645,14 @@ void MainForm::_createAnimationToolBar()
 
     _animationToolBar->setWhatsThis(qat);
 
-    connect(_playForwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPlayForward()));
-    connect(_playBackwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPlayBackward()));
-    connect(_pauseAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPause()));
-    connect(_stepForwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationStepForward()));
-    connect(_stepBackAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationStepBackward()));
-    connect(_timeStepEdit, SIGNAL(returnPressed()), this, SLOT(_setTimeStep()));
+    // clang-format off
+    connect(_playForwardAction,  SIGNAL(triggered()),     _animationController, SLOT(AnimationPlayForward()));
+    connect(_playBackwardAction, SIGNAL(triggered()),     _animationController, SLOT(AnimationPlayReverse()));
+    connect(_pauseAction,        SIGNAL(triggered()),     _animationController, SLOT(AnimationPause()));
+    connect(_stepForwardAction,  SIGNAL(triggered()),     _animationController, SLOT(AnimationStepForward()));
+    connect(_stepBackAction,     SIGNAL(triggered()),     _animationController, SLOT(AnimationStepReverse()));
+    connect(_timeStepEdit,       SIGNAL(returnPressed()), this, SLOT(_setTimeStep()));
+    // clang-format on
 }
 
 void MainForm::_createVizToolBar()
@@ -698,7 +736,6 @@ void MainForm::_createVizToolBar()
     connect(_viewAllAction, SIGNAL(triggered()), _tabMgr, SLOT(ViewAll()));
     connect(_sethomeAction, SIGNAL(triggered()), _tabMgr, SLOT(SetHomeViewpoint()));
     connect(_alignViewCombo, SIGNAL(activated(int)), _tabMgr, SLOT(AlignView(int)));
-    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
     connect(_tileAction, SIGNAL(triggered()), _vizWinMgr, SLOT(FitSpace()));
     connect(_cascadeAction, SIGNAL(triggered()), _vizWinMgr, SLOT(Cascade()));
     connect(_interactiveRefinementSpin, SIGNAL(valueChanged(int)), this, SLOT(setInteractiveRefLevel(int)));
@@ -777,9 +814,9 @@ void MainForm::_disableProgressWidget()
 
 void MainForm::hookupSignals()
 {
-    connect(_tabMgr, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
+    connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    connect(_tabMgr, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
+    connect(_animationController, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
 
     connect(_tabMgr, SIGNAL(ActiveEventRouterChanged(string)), this, SLOT(setActiveEventRouter(string)));
 
@@ -866,6 +903,7 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportWRF_Action);
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
+    _importMenu->addAction("DCP", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -1613,6 +1651,8 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
 
+    if (GetSettingsParams()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
+
     if (!p->GetProjectionString().empty()) {
         options.push_back("-proj4");
         options.push_back(p->GetProjectionString());
@@ -1625,7 +1665,7 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
     //
 
     if (_sessionNewFlag) {
-        _tabMgr->ViewAll();
+        NavigationUtils::ViewAll(_controlExec);
         _tabMgr->SetHomeViewpoint();
 
         _sessionNewFlag = false;
@@ -2362,9 +2402,7 @@ void MainForm::_plotClosed()
 
 void MainForm::launchPythonVariables()
 {
-    if (!_pythonVariables) {
-        _pythonVariables = new PythonVariables(this);
-    }
+    if (!_pythonVariables) { _pythonVariables = new PythonVariables(this); }
     if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
     _pythonVariables->ShowMe();
 }
@@ -2373,7 +2411,7 @@ void MainForm::_setTimeStep()
 {
     _paramsMgr->BeginSaveStateGroup("Change Timestep");
     int ts = _timeStepEdit->text().toInt();
-    _tabMgr->AnimationSetTimestep(ts);
+    _animationController->SetTimeStep(ts);
     _paramsMgr->EndSaveStateGroup();
 }
 

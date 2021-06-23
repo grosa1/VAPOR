@@ -40,6 +40,7 @@
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
 #include "AnimationParams.h"
+#include "AnimationController.h"
 //#include "MiscParams.h"
 #include "TabManager.h"
 
@@ -76,7 +77,7 @@ class MainForm : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainForm(vector<QString> files, QApplication *app, QWidget *parent = 0);
+    MainForm(vector<QString> files, QApplication *app, bool interactive = true, QWidget *parent = 0);
     ~MainForm();
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
@@ -167,16 +168,16 @@ private:
 
     // Toolbars:
     //
-    QAction *     _tileAction;
-    QAction *     _cascadeAction;
-    QAction *     _homeAction;
-    QAction *     _sethomeAction;
-    QAction *     _viewAllAction;
-    QAction *     _viewRegionAction;
-    QAction *     _stepForwardAction;
-    QAction *     _stepBackAction;
-    QSpinBox *    _interactiveRefinementSpin;
-    QDockWidget * _tabDockWindow;
+    QAction *    _tileAction;
+    QAction *    _cascadeAction;
+    QAction *    _homeAction;
+    QAction *    _sethomeAction;
+    QAction *    _viewAllAction;
+    QAction *    _viewRegionAction;
+    QAction *    _stepForwardAction;
+    QAction *    _stepBackAction;
+    QSpinBox *   _interactiveRefinementSpin;
+    QDockWidget *_tabDockWindow;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;
@@ -198,6 +199,7 @@ private:
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
     TabManager *        _tabMgr;
+    AnimationController *_animationController;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 
@@ -313,6 +315,8 @@ private:
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
+
+    void CheckForUpdates();
 
     bool isOpenGLContextActive() const;
 

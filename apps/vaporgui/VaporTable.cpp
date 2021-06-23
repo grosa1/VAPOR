@@ -43,6 +43,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _showToolTips = false;
 
     SetVerticalHeaderWidth(100);
+    _table->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     connect(_table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked);
     connect(_table, &QTableWidget::cellChanged, this, &VaporTable::emitValueChanged);
@@ -80,9 +81,7 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 
     addCheckboxes(values);
 
-    if ((rows < 1) || (cols < 1)) {
-        _activeRow = -1;
-    }
+    if ((rows < 1) || (cols < 1)) { _activeRow = -1; }
     if (_activeRow >= rows) { _activeRow = rows - 1; }
 
     if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);

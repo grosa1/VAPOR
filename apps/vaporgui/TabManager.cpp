@@ -23,9 +23,9 @@
 #include <qwidget.h>
 #include <QScrollArea>
 #include <QSizePolicy>
-#include "AnimationEventRouter.h"
+#include "AnimationTab.h"
 #include "AnnotationEventRouter.h"
-#include "NavigationEventRouter.h"
+#include "ViewpointTab.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 #include "TabManager.h"
@@ -400,21 +400,16 @@ void TabManager::_createAllDefaultTabs()
     er = new AnnotationEventRouter(parent, _controlExec);
     _installTab(_navigationTabName, er->GetType(), er);
 
-    _animationEventRouter = new AnimationEventRouter(parent, _controlExec);
-
-    connect(_animationEventRouter, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
-    connect(_animationEventRouter, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
+    _animationEventRouter = new AnimationTab(parent, _controlExec);
 
     er = _animationEventRouter;
     _installTab(_navigationTabName, er->GetType(), er);
 
-    _navigationEventRouter = new NavigationEventRouter(parent, _controlExec);
+    _navigationEventRouter = new ViewpointTab(_controlExec);
     er = _navigationEventRouter;
     _installTab(_navigationTabName, er->GetType(), er);
 
-    connect((NavigationEventRouter *)er, SIGNAL(Proj4StringChanged(string)), this, SLOT(_setProj4String(string)));
-
-    connect((NavigationEventRouter *)er, SIGNAL(ProjectionTypeChanged(int)), this, SLOT(_projectionTypeChanged(int)));
+    connect((ViewpointTab *)er, SIGNAL(Proj4StringChanged(string)), this, SLOT(_setProj4String(string)));
 
     // Create renderers from render factory
     //
@@ -431,15 +426,6 @@ void TabManager::_createAllDefaultTabs()
 
     // set up widgets in tabs:
     _installWidgets();
-}
-
-void TabManager::_projectionTypeChanged(int itype)
-{
-    ViewpointParams::ProjectionType type = (ViewpointParams::ProjectionType)itype;
-    if (type == ViewpointParams::MapOrthographic) {
-        ViewAll();
-        SetHomeViewpoint();
-    }
 }
 
 void TabManager::_installTab(string tabName, string subTabName, EventRouter *eRouter)
@@ -575,6 +561,7 @@ void TabManager::_initRenderHolder()
     vector<string>    smallIconPaths;
     vector<bool>      dim2dSupport;
     vector<bool>      dim3dSupport;
+    vector<bool>      particleSupport;
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
         string tag = _subTabNames[_renderersTabName][i];
@@ -590,9 +577,10 @@ void TabManager::_initRenderHolder()
 
         dim2dSupport.push_back(re->Supports2DVariables());
         dim3dSupport.push_back(re->Supports3DVariables());
+        particleSupport.push_back(re->SupportsParticleVariables());
     }
 
-    _renderHolder = new RenderHolder(this, _controlExec, widgets, widgetNames, descriptions, iconPaths, smallIconPaths, dim2dSupport, dim3dSupport);
+    _renderHolder = new RenderHolder(this, _controlExec, widgets, widgetNames, descriptions, iconPaths, smallIconPaths, dim2dSupport, dim3dSupport, particleSupport);
 
     connect(_renderHolder, SIGNAL(activeChanged(string, string, string)), this, SLOT(_setActive(string, string, string)));
     connect(_renderHolder, SIGNAL(newRendererSignal(string, string, string)), this, SLOT(_newRenderer(string, string, string)));

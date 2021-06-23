@@ -520,7 +520,7 @@ int PyEngine::DerivedPythonVar::Initialize()
     vector<string> dimNames = m.GetDimNames();
     for (int i = 0; i < dimNames.size(); i++) {
         DC::Dimension dim;
-        status = _dataMgr->GetDimension(dimNames[i], dim);
+        status = _dataMgr->GetDimension(dimNames[i], dim, -1);
         VAssert(status);
 
         _dims.push_back(dim.GetLength());
@@ -561,7 +561,7 @@ bool PyEngine::DerivedPythonVar::GetBaseVarInfo(DC::BaseVar &var) const
 int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
     if (_meshMatchFlag && _inNames.size()) {
-        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level);
+        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level, -1);
         VAssert(rc >= 0);
     } else {
         dims_at_level = _dims;
@@ -640,7 +640,6 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
     rc = alloc_arrays(inputVarDims, outputVarDims, inputVarArrays, outputVarArrays);
     if (rc < 0) {
         SetErrMsg("Error allocating  memory");
-        DataMgrUtils::UnlockGrids(_dataMgr, variables);
         return (-1);
     }
 
@@ -660,14 +659,12 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
     _stdoutString = MyPython::Instance()->PyOut().c_str();
 
     if (rc < 0) {
-        DataMgrUtils::UnlockGrids(_dataMgr, variables);
         free_arrays(inputVarArrays, outputVarArrays);
         return (-1);
     }
 
     copy_region(outputVarArrays[0], region, min, max, outputVarDims[0]);
 
-    DataMgrUtils::UnlockGrids(_dataMgr, variables);
     free_arrays(inputVarArrays, outputVarArrays);
 
     return (0);
@@ -719,7 +716,6 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     rc = alloc_arrays(inputVarDims, outputVarDims, inputVarArrays, outputVarArrays);
     if (rc < 0) {
         SetErrMsg("Error allocating  memory");
-        DataMgrUtils::UnlockGrids(_dataMgr, variables);
         return (-1);
     }
 
@@ -739,7 +735,6 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     _stdoutString = MyPython::Instance()->PyOut().c_str();
 
     if (rc < 0) {
-        DataMgrUtils::UnlockGrids(_dataMgr, variables);
         free_arrays(inputVarArrays, outputVarArrays);
         return (-1);
     }
@@ -755,7 +750,6 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     }
     copy_region(outputVarArrays[0], region, min_roi, max_roi, outputVarDims[0]);
 
-    DataMgrUtils::UnlockGrids(_dataMgr, variables);
     free_arrays(inputVarArrays, outputVarArrays);
 
     return (0);

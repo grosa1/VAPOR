@@ -497,10 +497,7 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
         rc = _getMeshDisplacedNoGeo(dataMgr, hgtGrid, width, height, minBox, maxBox);
     }
 
-    if (hgtGrid) {
-        dataMgr->UnlockGrid(hgtGrid);
-        delete hgtGrid;
-    }
+    if (hgtGrid) { delete hgtGrid; }
 
     return (rc);
 }

@@ -283,7 +283,6 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
         structuredMesh = false;
     }
 
-    dataMgr->UnlockGrid(g);
     delete g;
 
     if (rc < 0) return (-1);
@@ -540,10 +539,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
         }
     }
 
-    if (hgtGrid) {
-        dataMgr->UnlockGrid(hgtGrid);
-        delete hgtGrid;
-    }
+    if (hgtGrid) { delete hgtGrid; }
 
     return (0);
 }
@@ -604,7 +600,6 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
         }
     }
 
-    dataMgr->UnlockGrid(hgtGrid);
     delete hgtGrid;
 
     return (rc);
@@ -729,10 +724,6 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     }
 
     _texStateSet(dataMgr);
-
-    // Unlock the Grid
-    //
-    dataMgr->UnlockGrid(g);
 
     return (texture);
 }

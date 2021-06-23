@@ -31,7 +31,7 @@ class ParamsMgr;
 }    // namespace VAPoR
 
 #ifdef WIN32
-    // Annoying unreferenced formal parameter warning
+     // Annoying unreferenced formal parameter warning
     #pragma warning(disable : 4100)
 #endif
 
@@ -128,6 +128,8 @@ public:
     //! Pure virtual method that indicates whether the current RenderEventRouter
     //! and its associated renderer support 3D variables.
     virtual bool Supports3DVariables() const = 0;
+
+    virtual bool SupportsParticleVariables() const { return false; };
 
     //! Virtual method to enable or disable rendering when turned on or off by
     //! a gui tab.
