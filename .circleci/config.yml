@@ -1,10 +1,5 @@
 version: 2.1
 
-#parameters:
-#  vaporVersion:
-#    type: string
-#    default: "3.4.0"
-
 orbs:
   win: circleci/windows@2.2.0
 
@@ -216,7 +211,6 @@ jobs:
           command: |
             cd /Users/distiller/project
             hash=`git rev-parse HEAD`
-            #version=<< pipeline.parameters.vaporVersion >>
             version=$(cat /tmp/workspace/installers/vaporVersion.txt)
             tag="${version}_PreRelease"
             cd /tmp/workspace/installers
