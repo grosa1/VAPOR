@@ -23,6 +23,7 @@
 #define MIN_WINDOW_WIDTH  700
 #define MIN_WINDOW_HEIGHT 700
 
+
 #ifdef WIN32
     #pragma warning(disable : 4251 4100)
 #endif
