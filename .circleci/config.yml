@@ -11,17 +11,11 @@ references:
       at: *workspace_root
 
 jobs:
-  build_ubuntu18:
+  build_ubuntu18_debug:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
     steps:
-      - run:
-          name: install python
-          command: |
-            apt-get update
-            apt-get install -y python3
-
       - checkout
 
       - run:
@@ -36,6 +30,23 @@ jobs:
           path: /tmp/debugOutput.txt
 
       - run:
+          name: check for Debug warnings
+          command: |
+            if grep -q warning /tmp/debugOutput.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_ubuntu18_debugOMP:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
           name: make debug with omp
           command: |
             cd /root/project/build
@@ -47,6 +58,23 @@ jobs:
           path: /tmp/debugOutputWithOMP.txt
 
       - run:
+          name: check for Debug OMP warnings
+          command: |
+            if grep -q warning /tmp/debugOutputWithOMP.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_ubuntu18_release:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
           name: make release
           command: |
             cd /root/project/build
@@ -56,6 +84,29 @@ jobs:
       
       - store_artifacts:
           path: /tmp/releaseOutput.txt
+
+      - run:
+          name: check for Release warnings
+          command: |
+            if grep -q warning /tmp/releaseOutput.txt; then
+               cat /tmp/releaseOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_ubuntu18_releaseOMP:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - run:
+          name: install python
+          command: |
+            apt-get update
+            apt-get install -y python3
+
+      - checkout
 
       - run:
           name: make release with omp
@@ -74,36 +125,6 @@ jobs:
 
       - store_artifacts:
           path: /root/project/test_apps/smokeTests/testResults
-
-      - run:
-          name: check for Debug warnings
-          command: |
-            if grep -q warning /tmp/debugOutput.txt; then
-               cat /tmp/debugOutput.txt
-               exit -1
-            else
-               exit 0
-            fi
-
-      - run:
-          name: check for Debug OMP warnings
-          command: |
-            if grep -q warning /tmp/debugOutputWithOMP.txt; then
-               cat /tmp/debugOutput.txt
-               exit -1
-            else
-               exit 0
-            fi
-
-      - run:
-          name: check for Release warnings
-          command: |
-            if grep -q warning /tmp/releaseOutput.txt; then
-               cat /tmp/releaseOutput.txt
-               exit -1
-            else
-               exit 0
-            fi
 
       - run:
           name: check for Release OMP warnings
@@ -205,7 +226,7 @@ jobs:
       - store_artifacts:
           path: /tmp/*.txt
 
-  build_centos7:
+  build_centos7_debug:
     docker:
       - image: sgpearse/vapor3-centos7:latest
 
@@ -224,6 +245,23 @@ jobs:
           path: /tmp/debugOutput.txt
 
       - run:
+          name: check for Debug warnings
+          command: |
+            if grep -q warning /tmp/debugOutput.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_centos7_debugOMP:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
           name: make debug with omp
           command: |
             cd /root/project/build
@@ -233,6 +271,23 @@ jobs:
 
       - store_artifacts:
           path: /tmp/debugOutputWithOMP.txt
+
+      - run:
+          name: check for Debug warnings
+          command: |
+            if grep -q warning /tmp/releaseOutputWithOMP.txt; then
+               cat /tmp/releaseOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_centos7_release:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
 
       - run:
           name: make release
@@ -246,6 +301,23 @@ jobs:
           path: /tmp/releaseOutput.txt
       
       - run:
+          name: check for Release warnings
+          command: |
+            if grep -q warning /tmp/releaseOutput.txt; then
+               cat /tmp/releaseOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  build_centos7_releaseOMP:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
           name: make release with omp
           command: |
             cd /root/project/build
@@ -254,21 +326,11 @@ jobs:
 
       - store_artifacts:
           path: /tmp/releaseOutputWithOMP.txt
-
-      - run:
-          name: check for Debug warnings
-          command: |
-            if grep -q warning /tmp/debugOutput.txt; then
-               cat /tmp/debugOutput.txt
-               exit -1
-            else
-               exit 0
-            fi
-
+      
       - run:
           name: check for Release warnings
           command: |
-            if grep -q warning /tmp/releaseOutput.txt; then
+            if grep -q warning /tmp/releaseOutputWithOMP.txt; then
                cat /tmp/releaseOutput.txt
                exit -1
             else
@@ -516,8 +578,14 @@ jobs:
 workflows:
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
+      - build_ubuntu18_debug
+      - build_ubuntu18_debugOMP
+      - build_ubuntu18_release
+      - build_ubuntu18_releaseOMP
+      - build_centos7_debug
+      - build_centos7_debugOMP
+      - build_centos7_release
+      - build_centos7_releaseOMP
       - test_clang_format
       #- build_ubuntu16
       #- build_osx
