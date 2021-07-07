@@ -9,6 +9,8 @@ typedef VolumeParams VP;
 
 static RenderEventRouterRegistrar<VolumeEventRouter> registrar(VolumeEventRouter::GetClassType());
 
+
+
 VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, VolumeParams::GetClassType())
 {
     // clang-format off
