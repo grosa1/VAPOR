@@ -364,8 +364,8 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
 {
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
-    vector<size_t> dims = g->GetDimensions();
-    VAssert(dims.size() == 2);
+    auto dims = g->GetDimensions();
+    VAssert(dims[2] == 1);
 
     _vertsWidth = dims[0];
     _vertsHeight = dims[1];
@@ -407,23 +407,23 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
 int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, double defaultZ)
 {
     VAssert(g->GetTopologyDim() == 2);
-    vector<size_t> dims = g->GetDimensions();
+    auto dims = g->GetDimensions();
 
     // Unstructured 2d grids are stored in 1d
     //
-    _vertsWidth = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+    _vertsWidth = std::accumulate(dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
     _vertsHeight = 1;
 
     // Count the number of triangle vertex indices needed
     //
-    size_t             maxVertexPerCell = g->GetMaxVertexPerCell();
-    vector<Size_tArr3> nodes(maxVertexPerCell);
+    size_t           maxVertexPerCell = g->GetMaxVertexPerCell();
+    vector<DimsType> nodes(maxVertexPerCell);
     _nindices = 0;
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         const vector<size_t> &cell = *citr;
-        g->GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
+        g->GetCellNodes(DimsType{cell[0], 0, 0}, nodes);
 
         if (nodes.size() < 3) continue;    // degenerate
         _nindices += 3 * (nodes.size() - 2);
@@ -469,7 +469,6 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     }
 
     VAssert(g->GetTopologyDim() == 2);
-    vector<size_t> dims = g->GetDimensions();
 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
     GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();
@@ -519,13 +518,13 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     // array for the triangle list
     //
     size_t                  maxVertexPerCell = g->GetMaxVertexPerCell();
-    vector<Size_tArr3>      nodes(maxVertexPerCell);
+    vector<DimsType>        nodes(maxVertexPerCell);
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t                  index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
         const vector<size_t> &cell = *citr;
-        g->GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
+        g->GetCellNodes(DimsType{cell[0], 0, 0}, nodes);
 
         if (nodes.size() < 3) continue;    // degenerate
 
@@ -571,8 +570,8 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
     if (rc < 0) return (rc);
     VAssert(hgtGrid);
 
-    vector<size_t> dims = g->GetDimensions();
-    VAssert(dims.size() == 2);
+    auto dims = g->GetDimensions();
+    VAssert(dims[2] == 1);
 
     size_t   width = dims[0];
     size_t   height = dims[1];
@@ -610,8 +609,8 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
 //
 int TwoDDataRenderer::_getMeshStructuredPlane(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
-    vector<size_t> dims = g->GetDimensions();
-    VAssert(dims.size() == 2);
+    auto dims = g->GetDimensions();
+    VAssert(dims[2] == 1);
 
     size_t   width = dims[0];
     size_t   height = dims[1];
@@ -696,7 +695,7 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
     // For structured grid variable data are stored in a 2D array.
     // For structured grid variable data are stored in a 1D array.
     //
-    vector<size_t> dims = g->GetDimensions();
+    auto dims = g->GetDimensions();
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
         _texWidth = dims[0];
         _texHeight = dims[1];

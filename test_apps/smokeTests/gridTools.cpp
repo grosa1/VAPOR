@@ -67,10 +67,12 @@ vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &d
 
 void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float value = minVal;
     for (size_t k = 0; k < z; k++) {
@@ -85,10 +87,12 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
 
 void MakeConstantField(Grid *grid, float value)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
@@ -99,10 +103,12 @@ void MakeConstantField(Grid *grid, float value)
 
 void MakeRamp(Grid *grid, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
@@ -119,10 +125,12 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 
 void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float xIncrement = axis == X ? (maxVal - minVal) / (dims[X] - 1) : 0;
     float yIncrement = axis == Y ? (maxVal - minVal) / (dims[Y] - 1) : 0;
@@ -157,20 +165,22 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     disagreements = 0;
     numMissingValues = 0;
 
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     double peak = 0.f;
     double sum = 0;
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                Size_tArr3 indices = {i, j, k};
-                double     trueValue = grid->GetValueAtIndex(indices);
+                DimsType indices = {i, j, k};
+                double   trueValue = grid->GetValueAtIndex(indices);
 
-                DblArr3 coords;
+                CoordType coords;
                 grid->GetUserCoordinates(indices, coords);
                 float sampleValue = grid->GetValue(coords);
 
@@ -191,7 +201,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
     rms = sqrt(sum / (x * y * z));
 
-    if (rms != 0 || disagreements > 0) rc = false;
+    if ((!Wasp::NearlyEqual(rms, 0.0)) || disagreements > 0) rc = false;
     return rc;
 }
 
@@ -208,16 +218,17 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     itr = g->ConstNodeBegin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
-        Size_tArr3          ijk3;
+        DimsType            ijk3 = {0, 0, 0};
         std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
-        Size_tArr3 itr3;
-        std::copy_n((*itr).begin(), itr3.size(), itr3.begin());
+        DimsType itr3 = {0, 0, 0};
+        std::copy_n((*itr).begin(), (*itr).size(), itr3.begin());
 
         double itrData = g->GetValueAtIndex(itr3);
         double gridData = g->GetValueAtIndex(ijk3);
@@ -246,7 +257,9 @@ bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagre
 
     itr = g->begin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -276,17 +289,18 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
 
     itr = g->ConstCoordBegin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijkVec = Wasp::VectorizeCoords(count, dims);
-        size_t              ijk[] = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
-        double              coords[3];
+        DimsType            ijk = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
+        CoordType           coords;
 
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
-        for (size_t dim = 0; dim < dims.size(); dim++) {
+        for (size_t dim = 0; dim < g->GetGeometryDim(); dim++) {
             if (!Wasp::NearlyEqual((*itr)[dim], coords[dim])) { disagree = true; }
         }
         if (disagree) { disagreements++; }
@@ -340,10 +354,12 @@ bool RunTest(Grid *grid)
 
 bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     bool        rc = true;
     std::string type = grid->GetType();
@@ -621,7 +637,7 @@ VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, co
     float deltaY = 1.0 / (dims[1] - 1);
     for (long j = 0; j < dims[1]; j++) {
         for (long i = 0; i < dims[0]; i++) {
-            Size_tArr3 indices = {j * dims[0] + i, 0, 0};
+            DimsType indices = {j * dims[0] + i, 0, 0};
 
             xug.SetValue(indices, i * deltaX);
             yug.SetValue(indices, j * deltaY);

@@ -67,6 +67,7 @@
 #include <vapor/DCMPAS.h>
 #include <vapor/DCP.h>
 #include <vapor/DCCF.h>
+#include <vapor/DCBOV.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -85,6 +86,8 @@
 #include "ParamsWidgetDemo.h"
 #include "AppSettingsMenu.h"
 #include "CheckForUpdate.h"
+#include "NoticeBoard.h"
+#include "CheckForNotices.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -479,8 +482,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
 
-    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true)) CheckForUpdates();
+    if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
+    if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
 }
+
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
 {
@@ -567,6 +572,8 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "dcp";
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
+    else if (isDatasetValidFormat<DCBOV>(paths))
+        *fmt = "bov";
     else
         return false;
     return true;
@@ -594,6 +601,26 @@ void MainForm::CheckForUpdates()
 
         if (!cb->isChecked()) {
             GetSettingsParams()->SetValueLong(SettingsParams::AutoCheckForUpdatesTag, "", false);
+            GetSettingsParams()->SaveSettings();
+        }
+    });
+}
+
+
+void MainForm::CheckForNotices()
+{
+#ifndef NDEBUG
+    return;    // Don't check for notices in debug builds
+#endif
+
+    CheckForGHNotices([this](const std::vector<Notice> &notices) {
+        if (notices.empty()) return;
+
+        NoticeBoard board(notices);
+        board.exec();
+
+        if (board.WasDisableCheckingRequested()) {
+            GetSettingsParams()->SetAutoCheckForNotices(false);
             GetSettingsParams()->SaveSettings();
         }
     });
@@ -903,7 +930,8 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportWRF_Action);
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
-    _importMenu->addAction("DCP", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("Data Collection Particles (DCP)", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -1741,6 +1769,12 @@ void MainForm::importMPASData()
 {
     vector<string> files;
     loadDataHelper("", files, "MPAS files", "", "mpas", true);
+}
+
+void MainForm::importBOVData()
+{
+    vector<string> files;
+    loadDataHelper("", files, "BOV files", "", "bov", false);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)

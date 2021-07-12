@@ -143,6 +143,8 @@ set (SRCS
     VFileSelector.h
 	V3DInput.cpp
 	V3DInput.h
+	V3DIntInput.cpp
+	V3DIntInput.h
 	VGroup.cpp
 	VGroup.h
 	Updateable.cpp
@@ -196,6 +198,8 @@ set (SRCS
 	PTFEditor.h
     PFidelitySection.cpp
     PFidelitySection.h
+    PAxisAnnotationWidget.cpp
+    PAxisAnnotationWidget.h
     PTMSLODInput.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
@@ -271,6 +275,10 @@ set (SRCS
     AnimationController.h
     AnimationTab.cpp
     AnimationTab.h
+    CheckForNotices.cpp
+    CheckForNotices.h
+    NoticeBoard.cpp
+    NoticeBoard.h
     ParticleEventRouter.cpp
     ParticleEventRouter.h
 
@@ -386,7 +394,7 @@ elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()
 
-install (
+OpenMPInstall (
 	TARGETS vapor
 	DESTINATION ${INSTALL_BIN_DIR}
 	COMPONENT vaporgui

@@ -154,7 +154,9 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 {
     double mv = grid->GetMissingValue();
     float  defaultZ = GetDefaultZ(_dataMgr, _cacheParams.ts);
-    size_t numNodes = Wasp::VProduct(grid->GetDimensions());
+    auto   tmp = grid->GetDimensions();
+    auto   dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    size_t numNodes = Wasp::VProduct(dims);
 
     // Pre-allocate vertices vector upfront for better performance
     //
@@ -194,7 +196,7 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 
         // Create an entry in nodeMap
         //
-        size_t index = Wasp::LinearizeCoords(*nodeItr, grid->GetDimensions());
+        size_t index = Wasp::LinearizeCoords(*nodeItr, dims);
 
         if (vertices.size() > std::numeric_limits<GLuint>::max()) {
 #ifndef NDEBUG
@@ -221,12 +223,14 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 //
 size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
-    size_t             invalidIndex = std::numeric_limits<size_t>::max();
-    size_t             numNodes = Wasp::VProduct(grid->GetDimensions());
-    bool               layered = grid->GetTopologyDim() == 3;
-    size_t             maxVertsPerCell = grid->GetMaxVertexPerCell();
-    vector<Size_tArr3> cellNodeIndices(maxVertsPerCell);
-    vector<GLuint>     cellNodeIndicesLinear(maxVertsPerCell);
+    auto             tmp = grid->GetDimensions();
+    auto             dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    size_t           invalidIndex = std::numeric_limits<size_t>::max();
+    size_t           numNodes = Wasp::VProduct(dims);
+    bool             layered = grid->GetTopologyDim() == 3;
+    size_t           maxVertsPerCell = grid->GetMaxVertexPerCell();
+    vector<DimsType> cellNodeIndices(maxVertsPerCell);
+    vector<GLuint>   cellNodeIndicesLinear(maxVertsPerCell);
 
     size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
     size_t maxLineIndices = numCells * (layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);
@@ -304,7 +308,9 @@ int WireFrameRenderer::_buildCache()
         }
     }
 
-    size_t         numNodes = Wasp::VProduct(grid->GetDimensions());
+    auto           tmp = grid->GetDimensions();
+    auto           dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    size_t         numNodes = Wasp::VProduct(dims);
     GLuint         invalidIndex = std::numeric_limits<GLuint>::max();
     vector<GLuint> nodeMap(numNodes, invalidIndex);
     _GPUOutOfMemory = false;

@@ -37,8 +37,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
     VAssert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
     _terrainFollowing = false;
@@ -55,9 +55,9 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
-    VAssert(zrg.GetDimensions().size() == 3);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
+    VAssert(zrg.GetNumDimensions() == 3);
 
     _terrainFollowing = true;
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
@@ -73,8 +73,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
 
     _terrainFollowing = false;
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
@@ -82,27 +82,33 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
     if (dim == 0) {
-        return (_xrg.GetDimensions());
+        ptr = &_xrg;
     } else if (dim == 1) {
-        return (_yrg.GetDimensions());
+        ptr = &_yrg;
     } else if (dim == 2) {
         if (_terrainFollowing) {
-            return (_zrg.GetDimensions());
+            ptr = &_zrg;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
         }
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    tmp2.resize(ptr->GetNumDimensions());
+    return tmp2;
 }
 
-void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void CurvilinearGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     for (int i = 0; i < GetGeometryDim(); i++) { VAssert(cMin[i] <= cMax[i]); }
@@ -142,9 +148,9 @@ void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &ma
     }
 }
 
-void CurvilinearGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void CurvilinearGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     coords[0] = _xrg.AccessIJK(cIndices[0], cIndices[1]);
@@ -159,11 +165,11 @@ void CurvilinearGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coo
     }
 }
 
-bool CurvilinearGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const
+bool CurvilinearGrid::GetIndicesCell(const CoordType &coords, DimsType &indices) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double x = cCoords[0];
@@ -186,12 +192,12 @@ bool CurvilinearGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices)
     return (true);
 }
 
-bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const
+bool CurvilinearGrid::InsideGrid(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // Do a quick check to see if the point is completely outside of
@@ -216,8 +222,9 @@ bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, bool begin) : ConstCoordItrAbstract()
 {
     _cg = cg;
-    vector<size_t> dims = _cg->GetDimensions();
-    _index = vector<size_t>(dims.size(), 0);
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
+    _index = vector<size_t>(ndims, 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
@@ -227,13 +234,13 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    if (dims.size() == 3) {
+    if (ndims == 3) {
         if (_terrainFollowing) {
             _coords.push_back(*_zCoordItr);
         } else {
@@ -262,7 +269,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 
 void CurvilinearGrid::ConstCoordItrCG::next()
 {
-    const vector<size_t> &dims = _cg->GetDimensions();
+    auto dims = _cg->GetDimensions();
 
     _index[0]++;
     ++_xCoordItr;
@@ -286,7 +293,7 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    if (dims.size() == 2) return;
+    if (_cg->GetNumDimensions() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -309,26 +316,30 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    const vector<size_t> &dims = _cg->GetDimensions();
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
 
     vector<size_t> maxIndex;
-    ;
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    maxIndex.reserve(3);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dims.size(), 0);
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index = vector<size_t>(ndims, 0);
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index.assign(ndims, 0);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
-    size_t offset2D = (long)(_index[1] * dims[0] + _index[0]) - (long)index2DL;
+    VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
+    size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
 
     _xCoordItr += offset2D;
     _yCoordItr += offset2D;
@@ -346,11 +357,11 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     }
 }
 
-float CurvilinearGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float CurvilinearGrid::GetValueNearestNeighbor(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double lambda[4], zwgt[2];
@@ -423,11 +434,11 @@ float interpolateQuad(const float values[4], const double lambda[4], float mv)
 }
 };    // namespace
 
-float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
+float CurvilinearGrid::GetValueLinear(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // Get Wachspress coordinates for horizontal weights, and
@@ -449,10 +460,10 @@ float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
     // Use Wachspress coordinates as weights to do linear interpolation
     // along XY plane
     //
-    vector<size_t> dims = GetDimensions();
+    auto dims = GetDimensions();
     VAssert(i < dims[0] - 1);
     VAssert(j < dims[1] - 1);
-    if (dims.size() > 2) VAssert(k < dims[2]);
+    if (GetNumDimensions() > 2) VAssert(k < dims[2]);
 
     float v0s[] = {AccessIJK(i, j, k), AccessIJK(i + 1, j, k), AccessIJK(i + 1, j + 1, k), AccessIJK(i, j + 1, k)};
 
@@ -478,7 +489,7 @@ float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
         return (v0 * zwgt[0] + v1 * zwgt[1]);
 }
 
-void CurvilinearGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void CurvilinearGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
 {
     // Get the horiztonal (X & Y) extents by visiting every point
     // on a single plane (horizontal coordinates are constant over Z).
@@ -535,11 +546,11 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
 
     // Check if point is in "first" triangle (0,0), (1,0), (1,1)
     //
-    double     lambda[3];
-    double     pt[] = {x, y};
-    Size_tArr3 iv = {i, i + 1, i + 1};
-    Size_tArr3 jv = {j, j, j + 1};
-    double     tverts0[] = {_xrg.AccessIJK(iv[0], jv[0], 0), _yrg.AccessIJK(iv[0], jv[0], 0), _xrg.AccessIJK(iv[1], jv[1], 0),
+    double   lambda[3];
+    double   pt[] = {x, y};
+    DimsType iv = {i, i + 1, i + 1};
+    DimsType jv = {j, j, j + 1};
+    double   tverts0[] = {_xrg.AccessIJK(iv[0], jv[0], 0), _yrg.AccessIJK(iv[0], jv[0], 0), _xrg.AccessIJK(iv[1], jv[1], 0),
                         _yrg.AccessIJK(iv[1], jv[1], 0), _xrg.AccessIJK(iv[2], jv[2], 0), _yrg.AccessIJK(iv[2], jv[2], 0)};
 
     bool inside = VAPoR::BarycentricCoordsTri(tverts0, pt, lambda);
@@ -581,9 +592,9 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
     return (true);
 }
 
-bool CurvilinearGrid::_insideFace(const Size_tArr3 &face, double pt[2], double lambda[4], vector<Size_tArr3> &nodes) const
+bool CurvilinearGrid::_insideFace(const DimsType &face, double pt[2], double lambda[4], vector<DimsType> &nodes) const
 {
-    DblArr3 verts[4];    // space for 4 vertices with 3D user coordinates
+    CoordType verts[4];    // space for 4 vertices with 3D user coordinates
 
     size_t gDim = GetGeometryDim();
 
@@ -628,12 +639,12 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
     // Find the indices for the faces that might contain the point
     //
-    vector<Size_tArr3> face_indices;
+    vector<DimsType> face_indices;
     _qtr->GetPayloadContained(x, y, face_indices);
 
-    bool               inside = false;
-    double             pt[] = {x, y};
-    vector<Size_tArr3> nodes(8);
+    bool             inside = false;
+    double           pt[] = {x, y};
+    vector<DimsType> nodes(8);
     for (int ii = 0; ii < face_indices.size(); ii++) {
         if (_insideFace(face_indices[ii], pt, lambda, nodes)) {
             i = face_indices[ii][0];
@@ -664,7 +675,7 @@ std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() co
     const vector<size_t> &dims = GetCellDimensions();
     size_t                reserve_size = dims[0] * dims[1];
 
-    DblArr3 minu, maxu;
+    CoordType minu, maxu;
     GetUserExtents(minu, maxu);
 
     std::shared_ptr<QuadTreeRectangleP> qtr = std::make_shared<QuadTreeRectangleP>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 12, reserve_size);

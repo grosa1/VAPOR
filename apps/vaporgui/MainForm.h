@@ -145,6 +145,7 @@ private:
     QAction *_dataImportWRF_Action;
     QAction *_dataImportCF_Action;
     QAction *_dataImportMPAS_Action;
+    QAction *_dataImportBOV_Action;
     QAction *_dataLoad_MetafileAction;
     QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
@@ -317,6 +318,7 @@ private:
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
 
     void CheckForUpdates();
+    void CheckForNotices();
 
     bool isOpenGLContextActive() const;
 
@@ -345,6 +347,7 @@ private slots:
     void importWRFData();
     void importCFData();
     void importMPASData();
+    void importBOVData();
     void sessionNew();
     void captureJpegSequence();
     void captureTiffSequence();

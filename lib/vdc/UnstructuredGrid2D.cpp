@@ -29,7 +29,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 {
     VAssert(xug.GetDimensions() == GetDimensions());
     VAssert(yug.GetDimensions() == GetDimensions());
-    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetDimensions().size() == 0);
+    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetNumDimensions() == 0);
 
     VAssert(location == NODE);
 
@@ -38,24 +38,30 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
+
     if (dim == 0) {
-        return (_xug.GetDimensions());
+        ptr = &_xug;
     } else if (dim == 1) {
-        return (_yug.GetDimensions());
+        ptr = &_yug;
     } else if (dim == 2) {
-        if (GetGeometryDim() == 3) {
-            return (_zug.GetDimensions());
-        } else {
+        if (GetGeometryDim() == 3)
+            ptr = &_zug;
+        else
             return (vector<size_t>(1, 1));
-        }
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(ptr->GetNumDimensions());
+    return dims;
 }
 
-size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetNumDimensions() == 0 ? 2 : 3); }
 
-void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void UnstructuredGrid2D::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
 {
     float range[2];
 
@@ -74,20 +80,23 @@ void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) cons
     maxu[2] = range[1];
 }
 
-void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void UnstructuredGrid2D::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     int ncoords = GetGeometryDim();
     minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
     minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
-    size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
-    size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
+
+    size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), ndims);
+    size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), ndims);
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.
@@ -106,15 +115,15 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     }
 }
 
-bool UnstructuredGrid2D::GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const
+bool UnstructuredGrid2D::GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const
 {
     VAssert(0 && "Not implemented");
     return (true);
 }
 
-void UnstructuredGrid2D::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void UnstructuredGrid2D::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     coords[0] = _xug.GetValueAtIndex(cIndices);
@@ -122,12 +131,12 @@ void UnstructuredGrid2D::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &
     if (GetGeometryDim() == 3) { coords[2] = _zug.GetValueAtIndex(cIndices); }
 }
 
-bool UnstructuredGrid2D::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &cindices, std::vector<std::vector<size_t>> &nodes, std::vector<double> &lambdav) const
+bool UnstructuredGrid2D::GetIndicesCell(const CoordType &coords, DimsType &cindices, std::vector<std::vector<size_t>> &nodes, std::vector<double> &lambdav) const
 {
     nodes.clear();
     lambdav.clear();
 
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double *lambda = new double[_maxVertexPerFace];
@@ -152,9 +161,9 @@ bool UnstructuredGrid2D::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &cindi
     return (status);
 }
 
-bool UnstructuredGrid2D::InsideGrid(const DblArr3 &coords) const
+bool UnstructuredGrid2D::InsideGrid(const CoordType &coords) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double *       lambda = new double[_maxVertexPerFace];
@@ -171,12 +180,12 @@ bool UnstructuredGrid2D::InsideGrid(const DblArr3 &coords) const
     return (status);
 }
 
-float UnstructuredGrid2D::GetValueNearestNeighbor(const DblArr3 &coords) const
+float UnstructuredGrid2D::GetValueNearestNeighbor(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double *       lambda = new double[_maxVertexPerFace];
@@ -207,12 +216,12 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const DblArr3 &coords) const
     return ((float)value);
 }
 
-float UnstructuredGrid2D::GetValueLinear(const DblArr3 &coords) const
+float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double *       lambda = new double[_maxVertexPerFace];
@@ -317,7 +326,7 @@ std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &ug)
 // the face containing the point in XY, and the linear
 // interpolation weights/coordinates along Z.
 //
-bool UnstructuredGrid2D::_insideGrid(const DblArr3 &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
+bool UnstructuredGrid2D::_insideGrid(const CoordType &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
     nodes.clear();
 
@@ -328,13 +337,13 @@ bool UnstructuredGrid2D::_insideGrid(const DblArr3 &coords, size_t &face, vector
     }
 }
 
-bool UnstructuredGrid2D::_insideGridFaceCentered(const DblArr3 &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
+bool UnstructuredGrid2D::_insideGridFaceCentered(const CoordType &coords, size_t &face, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
     VAssert(0 && "Not supported");
     return false;
 }
 
-bool UnstructuredGrid2D::_insideGridNodeCentered(const DblArr3 &coords, size_t &face_index, vector<size_t> &nodes, double *lambda, int &nlambda) const
+bool UnstructuredGrid2D::_insideGridNodeCentered(const CoordType &coords, size_t &face_index, vector<size_t> &nodes, double *lambda, int &nlambda) const
 {
     nodes.clear();
 
@@ -342,7 +351,7 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(const DblArr3 &coords, size_t &
 
     // Find the indices for the faces that might contain the point
     //
-    vector<Size_tArr3> face_indices;
+    vector<DimsType> face_indices;
     _qtr->GetPayloadContained(pt[0], pt[1], face_indices);
 
     for (int i = 0; i < face_indices.size(); i++) {
@@ -399,10 +408,10 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
 
 std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
-    const vector<size_t> &dims = GetDimensions();
-    size_t                reserve_size = dims[0];
+    auto   dims = GetDimensions();
+    size_t reserve_size = dims[0];
 
-    DblArr3 minu, maxu;
+    CoordType minu, maxu;
     GetUserExtents(minu, maxu);
 
     std::shared_ptr<QuadTreeRectangleP> qtr = std::make_shared<QuadTreeRectangleP>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 12, reserve_size);

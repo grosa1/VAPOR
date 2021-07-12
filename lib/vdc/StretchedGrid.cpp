@@ -42,27 +42,19 @@ size_t StretchedGrid::GetGeometryDim() const { return (_zcoords.size() == 0 ? 2 
 
 vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
 {
-    if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
-    } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
-    } else if (dim == 2) {
-        if (GetDimensions().size() == 3) {
-            return (vector<size_t>(1, GetDimensions()[2]));
-        } else {
-            return (vector<size_t>(1, 1));
-        }
+    if (dim < 3) {
+        return (vector<size_t>(1, GetDimensions()[dim]));
     } else {
         return (vector<size_t>(1, 1));
     }
 }
 
-void StretchedGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void StretchedGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     for (int i = 0; i < GetNodeDimensions().size(); i++) { VAssert(cMin[i] <= cMax[i]); }
@@ -89,12 +81,10 @@ void StretchedGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max,
     if (minu[2] > maxu[2]) std::swap(minu[2], maxu[2]);
 }
 
-void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void StretchedGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
-
-    vector<size_t> dims = StructuredGrid::GetDimensions();
 
     coords[0] = _xcoords[cIndices[0]];
     coords[1] = _ycoords[cIndices[1]];
@@ -102,11 +92,11 @@ void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coord
     if (GetGeometryDim() > 2) { coords[2] = _zcoords[cIndices[2]]; }
 }
 
-bool StretchedGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const
+bool StretchedGrid::GetIndicesCell(const CoordType &coords, DimsType &indices, double wgts[3]) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double x = cCoords[0];
@@ -132,12 +122,12 @@ bool StretchedGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, d
     return (true);
 }
 
-bool StretchedGrid::InsideGrid(const DblArr3 &coords) const
+bool StretchedGrid::InsideGrid(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // Do a quick check to see if the point is completely outside of
@@ -162,14 +152,15 @@ bool StretchedGrid::InsideGrid(const DblArr3 &coords) const
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool begin) : ConstCoordItrAbstract()
 {
     _sg = sg;
-    vector<size_t> dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
-    _index = vector<size_t>(dims.size(), 0);
-    if (!begin) { _index[dims.size() - 1] = dims[dims.size() - 1]; }
+    _index = vector<size_t>(ndims, 0);
+    if (!begin) { _index[ndims - 1] = dims[ndims - 1]; }
 
     _coords.push_back(_sg->_xcoords[0]);
     _coords.push_back(_sg->_ycoords[0]);
-    if (dims.size() == 3) { _coords.push_back(_sg->_zcoords[0]); }
+    if (ndims == 3) { _coords.push_back(_sg->_zcoords[0]); }
 }
 
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const ConstCoordItrSG &rhs) : ConstCoordItrAbstract()
@@ -188,7 +179,8 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract()
 
 void StretchedGrid::ConstCoordItrSG::next()
 {
-    const vector<size_t> &dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
     _index[0]++;
 
@@ -207,7 +199,7 @@ void StretchedGrid::ConstCoordItrSG::next()
         return;
     }
 
-    if (dims.size() == 2) return;
+    if (ndims == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -221,38 +213,41 @@ void StretchedGrid::ConstCoordItrSG::next()
 
 void StretchedGrid::ConstCoordItrSG::next(const long &offset)
 {
-    const vector<size_t> &dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
     if (!_index.size()) return;
 
     vector<size_t> maxIndex;
+    maxIndex.reserve(3);
     ;
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dims.size(), 0);
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index = vector<size_t>(ndims, 0);
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index.assign(ndims, 0);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     _coords[0] = _sg->_xcoords[_index[0]];
     _coords[1] = _sg->_ycoords[_index[1]];
 
-    if (dims.size() == 2) return;
+    if (ndims == 2) return;
 
     _coords[2] = _sg->_zcoords[_index[2]];
 }
 
-float StretchedGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float StretchedGrid::GetValueNearestNeighbor(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double xwgt[2], ywgt[2], zwgt[2];
@@ -271,11 +266,11 @@ float StretchedGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     return (AccessIJK(i, j, k));
 }
 
-float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
+float StretchedGrid::GetValueLinear(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 &&
@@ -290,10 +285,11 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     if (!inside) return (GetMissingValue());
 
-    vector<size_t> dims = GetDimensions();
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
-    if (dims.size() > 2) VAssert(k < dims[2]);
+    if (ndims > 2) VAssert(k < dims[2]);
 
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
@@ -303,7 +299,7 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     float v0 = ((verts0[0] * xwgt[0] + verts0[1] * xwgt[1]) * ywgt[0]) + ((verts0[2] * xwgt[0] + verts0[3] * xwgt[1]) * ywgt[1]);
 
-    if (GetGeometryDim() == 2) return (v0);
+    if (ndims == 2) return (v0);
 
     if (dims[2] > 1) k++;
 
@@ -321,19 +317,20 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
     return (v0 * zwgt[0] + v1 * zwgt[1]);
 }
 
-void StretchedGrid::GetUserExtentsHelper(DblArr3 &minext, DblArr3 &maxext) const
+void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) const
 {
-    vector<size_t> dims = StructuredGrid::GetDimensions();
+    auto dims = StructuredGrid::GetDimensions();
 
-    Size_tArr3 min, max;
+    DimsType min = {0, 0, 0};
+    DimsType max = {0, 0, 0};
     for (int i = 0; i < dims.size(); i++) {
-        min[i] = 0;
+        assert(dims[i] > 0);    // will help debug
         max[i] = (dims[i] - 1);
     }
 
-    DblArr3 minv, maxv;
+    CoordType minv, maxv;
     StretchedGrid::GetBoundingBox(min, max, minv, maxv);
-    for (int i = 0; i < GetDimensions().size(); i++) {
+    for (int i = 0; i < GetNumDimensions(); i++) {
         minext[i] = minv[i];
         maxext[i] = maxv[i];
     }

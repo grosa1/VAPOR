@@ -27,9 +27,9 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
-    VAssert(xug.GetDimensions().size() == 1);
-    VAssert(yug.GetDimensions().size() == 1);
-    VAssert(zug.GetDimensions().size() == 1);
+    VAssert(xug.GetNumDimensions() == 1);
+    VAssert(yug.GetNumDimensions() == 1);
+    VAssert(zug.GetNumDimensions() == 1);
 
     VAssert(location == NODE);
 }
@@ -37,22 +37,29 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
+
     if (dim == 0) {
-        return _xug.GetDimensions();
+        ptr = &_xug;
     } else if (dim == 1) {
-        return _yug.GetDimensions();
+        ptr = &_yug;
     } else if (dim == 2) {
-        return _zug.GetDimensions();
+        ptr = &_zug;
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(ptr->GetNumDimensions());
+    return dims;
 }
 
 
 size_t UnstructuredGrid3D::GetGeometryDim() const { return (3); }
 
 
-void UnstructuredGrid3D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void UnstructuredGrid3D::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
 {
     float range[2];
 
@@ -70,12 +77,12 @@ void UnstructuredGrid3D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) cons
 }
 
 
-void UnstructuredGrid3D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void UnstructuredGrid3D::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     float range[2];
@@ -91,23 +98,19 @@ void UnstructuredGrid3D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     _zug.GetRange(min, max, range);
     minu[2] = range[0];
     maxu[2] = range[1];
-
-    //    printf("UnstructuredGrid3D::%s(-, -)\n", __func__);
-    //    printf("\t min = [%f, %f, %f]\n", minu[0], minu[1], minu[2]);
-    //    printf("\t max = [%f, %f, %f]\n", maxu[0], maxu[1], maxu[2]);
 }
 
 
-bool UnstructuredGrid3D::GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const
+bool UnstructuredGrid3D::GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const
 {
     VAssert(0 && "Not implemented");
     return (true);
 }
 
 
-void UnstructuredGrid3D::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void UnstructuredGrid3D::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     coords[0] = _xug.GetValueAtIndex(cIndices);
@@ -116,7 +119,7 @@ void UnstructuredGrid3D::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &
 }
 
 
-bool UnstructuredGrid3D::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const
+bool UnstructuredGrid3D::GetIndicesCell(const CoordType &coords, DimsType &indices) const
 {
     vector<size_t> nodes2D;
     vector<double> lambda;
@@ -126,9 +129,9 @@ bool UnstructuredGrid3D::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indic
 }
 
 
-bool UnstructuredGrid3D::InsideGrid(const DblArr3 &coords) const
+bool UnstructuredGrid3D::InsideGrid(const CoordType &coords) const
 {
-    Size_tArr3          indices;
+    DimsType            indices;
     std::vector<size_t> nodes2D;
     vector<double>      lambda;
     float               zwgt[2];
@@ -137,21 +140,21 @@ bool UnstructuredGrid3D::InsideGrid(const DblArr3 &coords) const
 }
 
 
-bool UnstructuredGrid3D::_insideGrid(const DblArr3 &coords, Size_tArr3 &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const
+bool UnstructuredGrid3D::_insideGrid(const CoordType &coords, DimsType &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const
 {
     VAssert(!"Not implemented");
     return false;
 }
 
 
-float UnstructuredGrid3D::GetValueNearestNeighbor(const DblArr3 &coords) const
+float UnstructuredGrid3D::GetValueNearestNeighbor(const CoordType &coords) const
 {
     VAssert(!"Not implemented");
     return NAN;
 }
 
 
-float UnstructuredGrid3D::GetValueLinear(const DblArr3 &coords) const
+float UnstructuredGrid3D::GetValueLinear(const CoordType &coords) const
 {
     VAssert(!"Not implemented");
     return NAN;
