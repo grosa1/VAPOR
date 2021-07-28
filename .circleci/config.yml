@@ -100,7 +100,7 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DUSE_OMP=ON ..
+            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DUSE_OMP=ON ..
             make
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Weekly}" ; done
