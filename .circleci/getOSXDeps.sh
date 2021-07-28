@@ -11,12 +11,4 @@ cd /usr/local/VAPOR-Deps
 tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
 chmod -R 777 /usr/local/VAPOR-Deps
 brew install cmake
-#brew install llvm
-
-curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-tar xf MacPorts-2.7.1.tar.bz2
-cd MacPorts-2.7.1/
-./configure
-make
-sudo make install
-port install llvm-12
+brew install llvm
