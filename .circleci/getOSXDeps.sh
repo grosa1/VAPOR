@@ -12,3 +12,5 @@ tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
 chmod -R 777 /usr/local/VAPOR-Deps
 brew install cmake
 brew install llvm
+export LDFLAGS="-L/usr/local/opt/llvm/lib"
+export CPPFLAGS="-I/usr/local/opt/llvm/include"
