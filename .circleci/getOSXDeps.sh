@@ -19,4 +19,4 @@ cd MacPorts-2.7.1/
 ./configure
 make
 sudo make install
-sudo opt/local/bin/port install llvm-11
+sudo /opt/local/bin/port install llvm-11
