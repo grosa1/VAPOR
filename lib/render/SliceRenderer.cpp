@@ -21,6 +21,7 @@
 #define YZ 2
 
 #define MAX_TEXTURE_SIZE 2000
+#define GLM_ENABLE_EXPERIMENTAL
 
 //#define DEBUG 1
 
