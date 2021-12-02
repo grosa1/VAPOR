@@ -6,6 +6,7 @@ MAINTAINER The CentOS Project <cloud-ops@centos.org>
 
 CMD [ "/bin/bash" ]
 
+
 # Do not update yum!  updating system libraries renders Vapor incompatible on older
 # CentOS versions, such as those run on Casper and Hera
 #RUN yum -y clean all \
