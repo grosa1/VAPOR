@@ -44,7 +44,10 @@ jobs:
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
-
+      
+      - store_artifacts:
+          path: /root/project/build/*Weekly*
+      
       - persist_to_workspace:
           root: *workspace_root
           paths: 
@@ -216,21 +219,21 @@ jobs:
 workflows:
   version: 2
   weekly:
-    triggers:
-      - schedule:
+    #triggers:
+      #- schedule:
            #cron: "0 20 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
-           cron: "45 20 * * 4" # Thursday @ 20:45 UTC (Mountain Standard Time +6)
-           filters:
-             branches:
-               only: weekly
+           #cron: "45 20 * * 4" # Thursday @ 20:45 UTC (Mountain Standard Time +6)
+           #filters:
+           #  branches:
+           #    only: weekly
     jobs:
       - build_ubuntu18_installer
-      - build_centos7_installer
-      - build_osx_installer
-      - build_win10_installer
-      - release_weekly_installers:
-          requires:
-            - build_ubuntu18_installer
-            - build_centos7_installer
-            - build_osx_installer
-            - build_win10_installer
+      #- build_centos7_installer
+      #- build_osx_installer
+      #- build_win10_installer
+      #- release_weekly_installers:
+      #    requires:
+      #      - build_ubuntu18_installer
+      #      - build_centos7_installer
+      #      - build_osx_installer
+      #      - build_win10_installer
