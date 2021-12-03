@@ -89,4 +89,7 @@ RUN chmod -R 777 /root/project \
     && cmake3 .. \
     && make && pwd && ls && ls bin
 
+RUN chown -R root:root /root
+RUN chmod -R 777 /root
+
 WORKDIR /root/project
