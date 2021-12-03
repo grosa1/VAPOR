@@ -72,8 +72,8 @@ jobs:
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
-      - store_artifacts:
-          path: /root/project/build/*Weekly*
+      #- store_artifacts:
+      #    path: /root/project/build/*Weekly*
       
       - persist_to_workspace:
           root: *workspace_root
@@ -118,6 +118,9 @@ jobs:
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
 
+      - store_artifacts:
+          path: /root/project/build/*Weekly*
+      
       - persist_to_workspace:
           root: *workspace_root
           paths: 
@@ -228,8 +231,8 @@ workflows:
            #    only: weekly
     jobs:
       #- build_ubuntu18_installer
-      - build_centos7_installer
-      #- build_osx_installer
+      #- build_centos7_installer
+      - build_osx_installer
       #- build_win10_installer
       #- release_weekly_installers:
       #    requires:
