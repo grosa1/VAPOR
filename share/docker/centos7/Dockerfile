@@ -63,35 +63,19 @@ RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
     && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
 
-RUN ls -lrth /usr/local/VAPOR-Deps/
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps \
+    && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug
 
-#RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
+RUN git clone https://github.com/NCAR/VAPOR.git /root/project \
+    && chown -R root:root /root/project \
+    && chmod -R 777 /root/project
 
-RUN chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-RUN chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-
-RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
-#RUN rm /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-
-RUN chown -R root:root /usr/local/VAPOR-Deps
-RUN chmod -R 777 /usr/local/VAPOR-Deps
-
-RUN git clone https://github.com/NCAR/VAPOR.git /root/project
-RUN chown -R root:root /root/project
-RUN chmod -R 777 /root/project
-
-RUN cp /root/project/site_files/site.NCAR /root/project/site.local
-RUN chown -R root:root /root/project
-RUN chmod -R 777 /root/project \
+RUN cp /root/project/site_files/site.NCAR /root/project/site.local \
     && mkdir -p /root/project/build
-RUN chown -R root:root /root/project
 RUN chmod -R 777 /root/project \
     && export CMAKE_CXX_COMPILER=g++ \
     && cd /root/project/build \
     && cmake3 .. \
     && make && pwd && ls && ls bin
-
-RUN chown -R root:root /root
-RUN chmod -R 777 /root
 
 WORKDIR /root/project
