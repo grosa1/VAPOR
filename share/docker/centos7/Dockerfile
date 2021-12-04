@@ -76,6 +76,6 @@ RUN chmod -R 777 /root/project \
     && export CMAKE_CXX_COMPILER=g++ \
     && cd /root/project/build \
     && cmake3 .. \
-    && make && pwd && ls && ls bin
+    && make && pwd
 
 WORKDIR /root/project
