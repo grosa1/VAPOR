@@ -53,7 +53,7 @@ RUN mkdir -p /usr/local/VAPOR-Deps
 # Qt 5.13.2
 #RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
 
-# Ospray
+# Ospray 2.8
 RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     && filename="/usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
@@ -61,7 +61,8 @@ RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename} \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
-    && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
+    && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
+    && ls
 
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug
