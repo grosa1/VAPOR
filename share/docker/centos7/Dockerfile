@@ -61,8 +61,7 @@ RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename} \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
-    && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
-    && ls
+    && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
 
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug
