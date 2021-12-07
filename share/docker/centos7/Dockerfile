@@ -14,6 +14,7 @@ CMD [ "/bin/bash" ]
 #    && yum -y update
 
 RUN yum -y install epel-release \
+    && yum -y install bzip2 \
     && yum -y install dbus \
     && yum -y install cmake3 \
     && yum -y install make \
@@ -60,8 +61,7 @@ RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename} \
-    && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
-    && chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
+    && chown -R root:root /usr/local/VAPOR-Deps
 
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps \
     && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug
