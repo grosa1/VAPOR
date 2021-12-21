@@ -6,6 +6,7 @@ MAINTAINER The CentOS Project <cloud-ops@centos.org>
 
 CMD [ "/bin/bash" ]
 
+
 # Do not update yum!  updating system libraries renders Vapor incompatible on older
 # CentOS versions, such as those run on Casper and Hera
 #RUN yum -y clean all \
@@ -13,6 +14,7 @@ CMD [ "/bin/bash" ]
 #    && yum -y update
 
 RUN yum -y install epel-release \
+    && yum -y install bzip2 \
     && yum -y install dbus \
     && yum -y install cmake3 \
     && yum -y install make \
@@ -52,40 +54,28 @@ RUN mkdir -p /usr/local/VAPOR-Deps
 # Qt 5.13.2
 #RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
 
-# Ospray
+# Ospray 2.8
 RUN fileid="1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn" \
     && filename="/usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
-    -o ${filename}
+    -o ${filename} \
+    && chown -R root:root /usr/local/VAPOR-Deps
 
-RUN ls -lrth /usr/local/VAPOR-Deps/
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps \
+    && chown -R root:root /usr/local/VAPOR-Deps/2019-Aug
 
-#RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
-
-RUN chown -R root:root /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-RUN chmod -R 777 /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-
-RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
-RUN rm /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
-
-RUN chown -R root:root /usr/local/VAPOR-Deps
-RUN chmod -R 777 /usr/local/VAPOR-Deps
-
-RUN git clone https://github.com/NCAR/VAPOR.git /root/project
-RUN chown -R root:root /root/project
-RUN chmod -R 777 /root/project
+RUN git clone https://github.com/NCAR/VAPOR.git /root/project \
+    && chown -R root:root /root/project \
+    && chmod -R 777 /root/project
 
 RUN cp /root/project/site_files/site.NCAR /root/project/site.local \
-RUN chown -R root:root /root/project
-RUN chmod -R 777 /root/project
     && mkdir -p /root/project/build
-RUN chown -R root:root /root/project
-RUN chmod -R 777 /root/project
+RUN chmod -R 777 /root/project \
     && export CMAKE_CXX_COMPILER=g++ \
     && cd /root/project/build \
     && cmake3 .. \
-    && make && pwd && ls && ls bin
+    && make && pwd
 
 WORKDIR /root/project
