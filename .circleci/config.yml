@@ -52,44 +52,86 @@ jobs:
       - store_artifacts:
           path: C:\Users\circleci\project\tmp\installers
 
-build_osx_installer:
-    macos:
-      xcode: "12.4.0"
+  build_osx_installer:
+      macos:
+        xcode: "12.4.0"
+      steps:
+        - run:
+            name: Make VAPOR-Deps
+            command: |
+              sudo mkdir -p /usr/local/VAPOR-Deps
+              sudo chmod -R 777 /usr/local/VAPOR-Deps
+              sudo chown -R `whoami` /usr/local/VAPOR-Deps
+        - checkout
+  
+        - run:
+            name: Get dependencies 
+            command: |
+              export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
+              if [ ! -f $DEPS ]; then
+                  ~/project/.circleci/getOSXDeps.sh
+              fi
+        - run:
+            name: make VAPOR
+            command: |
+              cp site_files/site.NCAR site.local
+              mkdir build
+              cd build
+              git checkout $CIRCLE_BRANCH
+              /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DUSE_OMP=ON -Wl,-rpath,/usr/local/opt/llvm/lib ..
+              make
+              make installer
+              mkdir -p /tmp/installers
+              mv *.dmg /tmp/installers
+            no_output_timeout: 30m
+  
+        - store_artifacts:
+            path: /tmp/installers
+
+  build_ubuntu18_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
     steps:
-      - run:
-          name: Make VAPOR-Deps
-          command: |
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            sudo chown -R `whoami` /usr/local/VAPOR-Deps
       - checkout
 
       - run:
-          name: Get dependencies 
+          name: make installer
           command: |
-            export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
-            if [ ! -f $DEPS ]; then
-                ~/project/.circleci/getOSXDeps.sh
-            fi
-      - run:
-          name: make VAPOR
-          command: |
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
+            cd /root/project/build
             git checkout $CIRCLE_BRANCH
-            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DUSE_OMP=ON -Wl,-rpath,/usr/local/opt/llvm/lib ..
-            make
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+            make -j7
             make installer
             mkdir -p /tmp/installers
-            mv *.dmg /tmp/installers
-          no_output_timeout: 30m
-
+            mv *.sh /tmp/installers
       - store_artifacts:
           path: /tmp/installers
+
+  build_centos7_installer:
+      docker:
+        - image: sgpearse/vapor3-centos7:latest
+  
+      steps:
+        - checkout
+  
+        - run:
+            name: cmake3 and make
+            command: |
+              cd /root/project/build
+              git checkout $CIRCLE_BRANCH
+              cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+              make
+              make installer
+              mkdir -p /tmp/installers
+              mv *.sh /tmp/installers
+        - store_artifacts:
+            path: /tmp/installers
 
 workflows:
   build:
     jobs:
       - build_win10_installer
       - build_osx_installer
+      - build_ubuntu18_installer
+      - build_centos7_installer
