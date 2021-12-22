@@ -13,7 +13,7 @@ chmod -R 777 /usr/local/VAPOR-Deps
 brew install cmake
 #brew install llvm
 
-curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
 tar xf MacPorts-2.7.1.tar.bz2
 cd MacPorts-2.7.1/
 ./configure
