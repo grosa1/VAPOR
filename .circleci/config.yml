@@ -391,7 +391,7 @@ jobs:
 
       - run:
           name: Get third party libraries
-            #set -eo pipefail
+          command: |
             pip3 install gdown
             sudo mkdir -p /usr/local/VAPOR-Deps
             sudo chmod 777 /usr/local/VAPOR-Deps
@@ -403,10 +403,12 @@ jobs:
       
       - run:
           name: Get cmake 
+          command: |
             brew install cmake
 
       - run:
           name: Get MacPorts
+          command: |
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
             tar xf MacPorts-2.7.1.tar.bz2
             cd MacPorts-2.7.1/
@@ -414,10 +416,12 @@ jobs:
             make
             sudo make install
 
-      - run:
-          name: Get clang12
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-12
-            sudo /opt/local/bin/port select --set clang mp-clang-12
+      #- run:
+      #    name: Get clang12
+      #    command: |
+      #      sudo /opt/local/bin/port selfupdate
+      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-12
+      #      sudo /opt/local/bin/port select --set clang mp-clang-12
 
       - run:
           name: make VAPOR
