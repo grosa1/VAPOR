@@ -518,9 +518,9 @@ jobs:
 workflows:
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
-      - test_clang_format
+      #- build_ubuntu18
+      #- build_centos7
+      #- test_clang_format
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
@@ -531,7 +531,7 @@ workflows:
       #- clang_tidy_ubuntu18
       #- build_ubuntu18_installer
       #- build_centos7_installer
-      #- build_osx_installer
+      - build_osx_installer
       #- build_win10_installer
       #- release_on_github:
       #    requires:
