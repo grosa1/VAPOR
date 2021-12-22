@@ -371,10 +371,11 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
+            git branch --set-upstream-to=origin/main main
             git checkout main
             git reset --hard origin/main
             export PATH=/opt/local/bin:$PATH
-            #sudo port select --set clang mp-clang-12
+            sudo port select --set clang mp-clang-12
             cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DUSE_OMP=ON ..
             make
             make installer
