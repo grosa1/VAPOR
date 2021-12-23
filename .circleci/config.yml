@@ -275,13 +275,13 @@ jobs:
 workflows:
   version: 2
   weekly:
-    triggers:
-      - schedule:
-           #cron: "0 20 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
-           cron: "50 0 * * 3"
-           filters:
-             branches:
-               only: weekly
+    #triggers:
+    #  - schedule:
+    #       #cron: "0 20 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
+    #       cron: "50 0 * * 3"
+    #       filters:
+    #         branches:
+    #           only: weekly
     jobs:
       - build_ubuntu18_installer
       - build_centos7_installer
