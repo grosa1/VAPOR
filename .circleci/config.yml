@@ -160,7 +160,7 @@ jobs:
             git reset --hard origin/main
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-12
-            cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DUSE_OMP
+            cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DUSE_OMP=ON ..
             make
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Weekly}" ; done
