@@ -477,7 +477,8 @@ void Advection::RemoveParticleProperty(const std::string &varToRemove)
 void Advection::ResetParticleValues()
 {
     for (auto &stream : _streams)
-        for (auto &part : stream) part.value = 0.0f;
+        for (auto &part : stream)
+            if (!part.IsSpecial()) part.value = 0.0f;
 }
 
 void Advection::SetXPeriodicity(bool isPeri, float min, float max)
