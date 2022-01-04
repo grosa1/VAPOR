@@ -237,7 +237,7 @@ workflows:
   weekly:
     triggers:
       - schedule:
-           cron: "55 16 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
+           cron: "40 18 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
            filters:
              branches:
                only: weekly
