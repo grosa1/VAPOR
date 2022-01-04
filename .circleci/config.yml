@@ -54,6 +54,11 @@ jobs:
       - store_artifacts:
           path: C:\Users\circleci\project\tmp\installers
 
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
+
   build_osx_installer:
     macos:
       xcode: "13.2.0"
@@ -166,30 +171,42 @@ jobs:
             make installer
             mkdir -p /tmp/installers
             mv *.sh /tmp/installers
+
       - store_artifacts:
           path: /tmp/installers
 
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
+
   build_centos7_installer:
-      docker:
-        - image: sgpearse/vapor3-centos7:latest
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
   
-      steps:
-        - checkout
-  
-        - run:
-            name: cmake3 and make
-            command: |
-              cd /root/project/build
-              git branch --set-upstream-to=origin/main main
-              git checkout main
-              git reset --hard origin/main
-              cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
-              make -j2
-              make installer
-              mkdir -p /tmp/installers
-              mv *.sh /tmp/installers
-        - store_artifacts:
-            path: /tmp/installers
+    steps:
+      - checkout
+
+      - run:
+          name: cmake3 and make
+          command: |
+            cd /root/project/build
+            git branch --set-upstream-to=origin/main main
+            git checkout main
+            git reset --hard origin/main
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+            make -j2
+            make installer
+            mkdir -p /tmp/installers
+            mv *.sh /tmp/installers
+
+      - store_artifacts:
+          path: /tmp/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   release_weekly_installers:
     macos:
@@ -237,7 +254,7 @@ workflows:
   weekly:
     triggers:
       - schedule:
-           cron: "40 18 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
+           cron: "25 19 * * 2" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
            filters:
              branches:
                only: weekly
