@@ -14,7 +14,7 @@
 //	Date:		October 2013
 //
 //	Description:	Implements the VizWin class
-//		This is the QGLWidget that performs OpenGL rendering (using associated
+//		This is the QOpenGLWidget that performs OpenGL rendering (using associated
 //		Visualizer).
 //
 //		Supports mouse event reporting.
@@ -66,7 +66,8 @@ using namespace VAPoR;
  *  name 'name' and widget flags set to 'f'.
  *
  */
-VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(new Core3_2_context(format), parent)
+//VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QOpenGLWidget(new Core3_2_context(format), parent)
+VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QOpenGLWidget(new Core3_2_context(format), parent)
 {
     _trackBall = trackBall;
 
@@ -638,7 +639,7 @@ void VizWin::Render(bool fast)
 
 void VizWin::_renderHelper(bool fast)
 {
-    // Need to call since we're not overriding QGLWidget::paintGL()
+    // Need to call since we're not overriding QOpenGLWidget::paintGL()
     //
     makeCurrent();
 

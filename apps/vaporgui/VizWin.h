@@ -20,7 +20,7 @@
 #define VIZWIN_H
 
 #include <GL/glew.h>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include "vapor/Transform.h"
 #include "Manip.h"
 #include <QWheelEvent>
@@ -42,14 +42,14 @@ struct GLManager;
 
 //! \class VizWin
 //! \ingroup Public_GUI
-/*! \brief A QGLWidget that supports display based on GL methods invoked in a
+/*! \brief A QOpenGLWidget that supports display based on GL methods invoked in a
  *    Visualizer
  */
 //! \author Alan Norton
 //! \version 3.0
 //! \date October 2013
 
-//!	The VizWin class is a QGLWidget that supports the rendering by the VAPOR
+//!	The VizWin class is a QOpenGLWidget that supports the rendering by the VAPOR
 //! Visualizer class.
 //! The standard rendering methods (resize, initialize, paint) are passed to the
 //! Visualizer.
@@ -57,7 +57,7 @@ struct GLManager;
 //! scene navigation
 //! or manipulator changes.
 //!
-class VizWin : public QGLWidget {
+class VizWin : public QOpenGLWidget {
     Q_OBJECT
 
 public:
@@ -117,7 +117,7 @@ private:
     virtual void focusInEvent(QFocusEvent *e);
     virtual void closeEvent(QCloseEvent *);
 
-    // QGLWidget reimplementations
+    // QOpenGLWidget reimplementations
     virtual void resizeGL(int width, int height);
     virtual void initializeGL();
 
