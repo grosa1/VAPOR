@@ -7,7 +7,7 @@
 V3DInput::V3DInput()
 {
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
+    //layout->setMargin(0);
     setLayout(layout);
 
     layout->addWidget(new QLabel("X"));

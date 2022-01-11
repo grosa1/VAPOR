@@ -61,7 +61,7 @@ class VizWin : public QOpenGLWidget {
     Q_OBJECT
 
 public:
-    VizWin(const QGLFormat &format, QWidget *parent, const QString &name, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
+    VizWin(QWidget *parent, const QString &name, string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
     ~VizWin();
 
     //! Identify the visualizer index

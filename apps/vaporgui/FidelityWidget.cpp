@@ -21,7 +21,7 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QButtonGroup>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
@@ -43,7 +43,7 @@ FidelityWidget::FidelityWidget(QWidget *parent) : QWidget(parent), Ui_FidelityWi
     hlay->setAlignment(Qt::AlignHCenter);
     fidelityBox->setLayout(hlay);
 
-    int dpi = qApp->desktop()->logicalDpiX();
+    int dpi = 100;//qApp->desktop()->logicalDpiX();
     if (dpi > 96) fidelityFrame->setMinimumHeight(100);
 
     connect(refinementCombo, SIGNAL(activated(int)), this, SLOT(setNumRefinements(int)));

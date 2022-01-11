@@ -39,7 +39,7 @@ NoticeBoard::NoticeBoard(const std::vector<Notice> &notices) : _notices(notices)
 
     auto *buttonsWidget = new QWidget;
     auto *buttons = new QHBoxLayout;
-    buttons->setMargin(0);
+    //buttons->setMargin(0);
     buttonsWidget->setLayout(buttons);
     layout->addWidget(buttonsWidget);
 

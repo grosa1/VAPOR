@@ -103,11 +103,12 @@ void VizWinMgr::_attachVisualizer(string vizName)
     QString qvizname = QString::fromStdString(vizName);
 
     int       major = 4, minor = 1;
-    QGLFormat glFormat;
-    glFormat.setVersion(major, minor);
-    glFormat.setProfile(QGLFormat::CoreProfile);
+    //QGLFormat glFormat;
+    //glFormat.setVersion(major, minor);
+    //glFormat.setProfile(QGLFormat::CoreProfile);
 
-    _vizWindow[vizName] = new VizWin(glFormat, _parent, qvizname, vizName, _controlExec, _trackBall
+    //_vizWindow[vizName] = new VizWin(glFormat, _parent, qvizname, vizName, _controlExec, _trackBall
+    _vizWindow[vizName] = new VizWin(_parent, qvizname, vizName, _controlExec, _trackBall
 
     );
 

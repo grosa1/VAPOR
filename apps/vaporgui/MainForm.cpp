@@ -35,7 +35,7 @@
 #include <functional>
 #include <cmath>
 
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QDockWidget>
 #include <QMenuBar>
 #include <QToolBar>
@@ -269,7 +269,7 @@ public:
     ProgressStatusBar()
     {
         QHBoxLayout *layout = new QHBoxLayout;
-        layout->setMargin(4);
+        //layout->setMargin(4);
         setLayout(layout);
 
         _cancelButton->setIcon(_cancelButton->style()->standardIcon(QStyle::StandardPixmap::SP_DialogCancelButton));
@@ -401,7 +401,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
 
     _animationController = new AnimationController(_controlExec);
 
-    int dpi = qApp->desktop()->logicalDpiX();
+    //int dpi = qApp->desktop()->logicalDpiX();
+    int dpi = 100;
     if (dpi > 96)
         _tabMgr->setMinimumWidth(675);
     else
@@ -411,7 +412,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
 
     QWidget *    sidebar = new QWidget;
     QVBoxLayout *sidebarLayout = new QVBoxLayout;
-    sidebarLayout->setMargin(0);
+    //sidebarLayout->setMargin(0);
     sidebarLayout->setSpacing(0);
     sidebar->setLayout(sidebarLayout);
     sidebarLayout->addWidget(_tabMgr);

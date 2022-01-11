@@ -7,7 +7,7 @@ TFMapGroupWidget::TFMapGroupWidget()
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(0);
-    layout->setMargin(0);
+    //layout->setMargin(0);
     setLayout(layout);
 }
 
@@ -68,7 +68,7 @@ void TFMapInfoGroupWidget::add(TFMapWidget *mapWidget)
         // the info widget in another widget with a box layout.
         QWidget *    box = new QWidget;
         QVBoxLayout *layout = new QVBoxLayout;
-        layout->setMargin(0);
+        //layout->setMargin(0);
         layout->setAlignment(Qt::AlignTop);
         layout->addWidget(info);
         box->setLayout(layout);

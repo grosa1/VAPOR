@@ -22,12 +22,13 @@
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include "vapor/VAssert.h"
+#include <QOpenGLContext>
 #include <QResizeEvent>
 #include <QFocusEvent>
 #include <QMouseEvent>
 #include <QCloseEvent>
 #include <QApplication>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QIcon>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ViewpointParams.h>
@@ -44,7 +45,7 @@
 #include "FlowEventRouter.h"
 #include "images/vapor-icon-32.xpm"
 #include "VizWin.h"
-#include "Core3_2_context.h"
+//#include "Core3_2_context.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
@@ -67,7 +68,7 @@ using namespace VAPoR;
  *
  */
 //VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QOpenGLWidget(new Core3_2_context(format), parent)
-VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QOpenGLWidget(new Core3_2_context(format), parent)
+VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec *ce, Trackball *trackBall) : QOpenGLWidget(parent)
 {
     _trackBall = trackBall;
 
@@ -79,7 +80,7 @@ VizWin::VizWin(QWidget *parent, const QString &name, string winName, ControlExec
     _glManager = nullptr;
     _manip = nullptr;
 
-    setAutoBufferSwap(false);
+    //setAutoBufferSwap(false);
     _mouseClicked = false;
     _buttonNum = 0;
     _navigateFlag = false;
@@ -206,8 +207,8 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
-    width *= QApplication::desktop()->devicePixelRatioF();
-    height *= QApplication::desktop()->devicePixelRatioF();
+    width *= 2;//QApplication::desktop()->devicePixelRatioF();
+    height *= 2;//QApplication::desktop()->devicePixelRatioF();
     int wWidth = width;
     int wHeight = height;
 
@@ -353,8 +354,8 @@ void VizWin::_mousePressEventManip(QMouseEvent *e)
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
-    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
-    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[0] *= 100;//QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= 100;//QApplication::desktop()->devicePixelRatioF();
 
     _manipFlag = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
 }
@@ -410,8 +411,8 @@ void VizWin::mousePressEvent(QMouseEvent *e)
         _buttonNum = 1;
     else if (e->button() == Qt::RightButton)
         _buttonNum = 3;
-    else if (e->button() == Qt::MidButton)
-        _buttonNum = 2;
+    //else if (e->button() == Qt::MidButton)
+    //    _buttonNum = 2;
 
     // ControlModifier means [command], not [control] apparently
     if (e->button() == Qt::LeftButton && (e->modifiers() & Qt::ShiftModifier)) { _buttonNum = 2; }
@@ -441,8 +442,8 @@ void VizWin::_mouseReleaseEventManip(QMouseEvent *e)
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
-    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
-    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[0] *= 100;//QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= 100;//QApplication::desktop()->devicePixelRatioF();
 
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
     _setNewExtents();
@@ -502,8 +503,8 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e)
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
-    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
-    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[0] *= 100;//QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= 100;//QApplication::desktop()->devicePixelRatioF();
 
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
     Render(true);
@@ -633,7 +634,7 @@ void VizWin::Render(bool fast)
     _insideRender = false;
 
     HideSTDERR();
-    swapBuffers();
+    context()->swapBuffers(context()->surface());
     RestoreSTDERR();
 }
 

@@ -4,8 +4,8 @@
 VGroup::VGroup(List children)
 {
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    //layout->setMargin(0);
+    //layout->setSpacing(4);
     setLayout(layout);
     AddM(children);
 }

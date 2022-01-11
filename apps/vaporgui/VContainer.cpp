@@ -5,7 +5,7 @@
 VContainer::VContainer(QWidget *w)
 {
     QLayout *layout = new QVBoxLayout;
-    layout->setMargin(0);
+    //layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(w);
     QWidget::setLayout(layout);

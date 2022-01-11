@@ -328,7 +328,8 @@ QColor TFColorMap::VColorToQColor(const ColorMap::Color &c)
 
 ColorMap::Color TFColorMap::QColorToVColor(const QColor &c)
 {
-    double h, s, v;
+    //double h, s, v;
+    float h, s, v;
     c.getHsvF(&h, &s, &v);
     return ColorMap::Color(h, s, v);
 }

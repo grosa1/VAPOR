@@ -278,8 +278,8 @@ void VaporTable::setValidator(QLineEdit *edit)
     if (_validatorFlags & INT) { edit->setValidator(new QIntValidator(edit)); }
     if (_validatorFlags & DOUBLE) { edit->setValidator(new QDoubleValidator(edit)); }
     if (_validatorFlags & STRING) {
-        QRegExpValidator *validator;
-        validator = new QRegExpValidator(QRegExp(".{1,64}"));
+        QRegularExpressionValidator *validator;
+        validator = new QRegularExpressionValidator(QRegularExpression(".{1,64}"));
         edit->setValidator(validator);
     }
 }

@@ -14,7 +14,7 @@ TFInfoWidget::TFInfoWidget(const std::string &variableNameTag) : _variableNameTa
 {
     QBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(12);
-    layout->setMargin(0);
+    //layout->setMargin(0);
     this->setLayout(layout);
     layout->addWidget(new VLineItem("Data Value", _valueEdit = new VDoubleLineEdit));
     _valueEditType = new QComboBox;
@@ -61,7 +61,7 @@ void TFInfoWidget::SetNormalizedValue(float value)
 void TFInfoWidget::paintEvent(QPaintEvent *event)
 {
     QStyleOption opt;
-    opt.init(this);
+    //opt.init(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 

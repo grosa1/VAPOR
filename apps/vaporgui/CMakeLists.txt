@@ -297,7 +297,7 @@ set (SRCS
 	EventRouter.h
 	GLWidget.h
 	VizWin.h
-	Core3_2_context.h
+	#Core3_2_context.h
     Manip.h 
 	AnnotationEventRouter.h
 	BannerGUI.h
@@ -349,7 +349,7 @@ set (PYTHON_LIB python${PYTHONVERSION}m)
 set (TIFF_LIB tiff)
 
 if (APPLE)
-	set (SRCS ${SRCS} core_profile_attributes.mm)
+	#set (SRCS ${SRCS} core_profile_attributes.mm)
 	set (MACOSX_BUNDLE_GUI_IDENTIFIER Vapor3)
 	set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}})
 	set (MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})

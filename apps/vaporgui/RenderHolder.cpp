@@ -59,7 +59,7 @@ NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> render
     _dim3DSupport = dim3DSupport;
     _particleSupport = particleSupport;
 
-    rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
+    rendererNameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9_]{1,64}")));
     dataMgrCombo->clear();
 
     _createButtons();

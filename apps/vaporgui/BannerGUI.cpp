@@ -4,7 +4,7 @@
 #include <qtimer.h>
 #include <qmessagebox.h>
 #include <qapplication.h>
-#include <qdesktopwidget.h>
+//#include <qdesktopwidget.h>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QScreen>
