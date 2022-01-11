@@ -256,7 +256,7 @@ workflows:
   weekly:
     triggers:
       - schedule:
-           cron: "45 14 * * 3" # Tuesday @ 20:00 UTC (Mountain Standard Time +6)
+           cron: "0 0 5 31 2 ?" # February 31 will never execute
            filters:
              branches:
                only: weekly
