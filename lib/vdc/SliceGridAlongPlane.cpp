@@ -254,6 +254,13 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
                                                         description.domainMin, 
                                                         description.domainMax
                                                       );
+
+    double x,y,z;
+    slice->GetUserCoordinates(0,0,0,x,y,z);
+    std::cout << "000 " << x << " " << y << " " << z << std::endl;
+    slice->GetUserCoordinates(0,1,0,x,y,z);
+    std::cout << "010 " << x << " " << y << " " << z << std::endl;
+
     return slice;
 }
 
