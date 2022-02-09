@@ -36,9 +36,9 @@ void PSliceOriginSelector::updateGUI() const
     assert(ret == 0);
     (void)ret;
 
-    _xSlider->SetRange(min[0], 2*max[0]);
-    _ySlider->SetRange(min[1], 2*max[1]);
-    _zSlider->SetRange(min[2], 2*max[2]);
+    _xSlider->SetRange(min[0], max[0]);
+    _ySlider->SetRange(min[1], max[1]);
+    _zSlider->SetRange(min[2], max[2]);
 
     PSection::updateGUI();
 }
