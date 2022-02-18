@@ -1,7 +1,7 @@
 #include "SliceEventRouter.h"
 #include <vapor/SliceParams.h>
 #include "PWidgets.h"
-#include "PSliceSampleLocationSelector.h"
+#include "PSliceController.h"
 
 using namespace VAPoR;
 
@@ -21,15 +21,12 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
         new PSection("Slice", {
-            (new PDoubleSliderEdit(SliceParams::_sampleRateTag, "N Samples"))->SetRange(32, 2000)
+            (new PDoubleSliderEdit(RenderParams::SampleRateTag, "N Samples"))->SetRange(32, 2000)
         })
     }));
     
     AddGeometrySubtab(new PGroup({
-        new PSection("Slice", {
-            new POrientationSelector,
-            new PSliceSampleLocationSelector,
-        }),
+        new PSliceController,
         new PGeometrySubtab,
     }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
@@ -39,7 +36,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 
 string SliceEventRouter::_getDescription() const
 {
-    return ("Displays an axis-aligned slice or cutting plane through"
+    return ("Displays a slice or cutting plane through"
             "a 3D variable.  Slices are sampled along the plane's axes according"
             " to a sampling rate define by the user.\n\n");
 }

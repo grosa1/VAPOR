@@ -21,9 +21,6 @@ set (SRCS
 	BarbEventRouter.cpp
 	BarbEventRouter.h
 	BannerGUI.cpp
-	AnimationParams.cpp
-	GUIStateParams.cpp
-	MouseModeParams.cpp
 	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
@@ -31,7 +28,6 @@ set (SRCS
     VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
-	TrackBall.cpp
 	ImageEventRouter.cpp
 	ImageEventRouter.h
 	ContourEventRouter.cpp
@@ -219,8 +215,8 @@ set (SRCS
 	PCopyRegionAnnotationWidget.h
 	PCopyRegionWidget.cpp
 	PCopyRegionWidget.h
-	PSliceSampleLocationSelector.cpp
-	PSliceSampleLocationSelector.h
+	PSliceController.cpp
+	PSliceController.h
 	PAnnotationColorbarWidget.cpp
 	PAnnotationColorbarWidget.h
 	PStringInput.cpp
@@ -241,6 +237,8 @@ set (SRCS
 	PButton.h
 	PFlowRakeRegionSelector.cpp
 	PFlowRakeRegionSelector.h
+    PFlowIntegrationRegionSelector.cpp
+    PFlowIntegrationRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
 	AppSettingsMenu.cpp
@@ -251,12 +249,8 @@ set (SRCS
     PCornerSelector.h
     RenderEventRouterGUI.cpp
     RenderEventRouterGUI.h
-    BookmarkParams.cpp
-    BookmarkParams.h
     CheckForUpdate.cpp
     CheckForUpdate.h
-    NavigationUtils.cpp
-    NavigationUtils.h
     PDatasetTransformWidget.cpp
     PDatasetTransformWidget.h
     PCameraControlsSection.cpp
@@ -281,6 +275,8 @@ set (SRCS
     NoticeBoard.h
     ParticleEventRouter.cpp
     ParticleEventRouter.h
+    PTimestepSliderEdit.cpp
+    PTimestepSliderEdit.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -302,9 +298,7 @@ set (SRCS
 	GLWidget.h
 	VizWin.h
 	Core3_2_context.h
-	TrackBall.h
     Manip.h 
-	AnimationParams.h
 	AnnotationEventRouter.h
 	BannerGUI.h
 	FlowEventRouter.h
@@ -312,8 +306,6 @@ set (SRCS
 	CopyRegionWidget.h
 	CopyRegionAnnotationWidget.h
 	FileOperationChecker.h
-	GUIStateParams.h
-	MouseModeParams.h
 	PlotParams.h
     PythonVariablesParams.h
 	QIntValidatorWithFixup.h
@@ -326,6 +318,7 @@ set (SRCS
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	Flags.h
+	QMontereySlider.h
 )
 
 set (UIS 

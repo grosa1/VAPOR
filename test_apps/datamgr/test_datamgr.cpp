@@ -154,7 +154,7 @@ void print_info(DataMgr &datamgr, bool verbose)
     cout << endl << endl;
 }
 
-void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
+void test_node_iterator(const Grid *g, VAPoR::CoordType minu, VAPoR::CoordType maxu)
 {
     cout << "Node Iterator Test ----->" << endl;
 
@@ -163,11 +163,7 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
 
     float t0 = GetTime();
 
-    CoordType minuCT = {0.0, 0.0, 0.0};
-    CoordType maxuCT = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(minu, minuCT);
-    Grid::CopyToArr3(maxu, maxuCT);
-    itr = g->ConstNodeBegin(minuCT, maxuCT);
+    itr = g->ConstNodeBegin(minu, maxu);
 
     size_t count = 0;
     for (; itr != enditr; ++itr) { count++; }
@@ -182,14 +178,13 @@ void test_get_value(Grid *g)
 
     g->SetInterpolationOrder(1);
 
-    const float epsilon = 0.000001;
-
     float t0 = GetTime();
 
     auto   tmp = g->GetDimensions();
     auto   tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     size_t n = VProduct(tmp2);
 
+    size_t count = 0;
     size_t ecount = 0;
 #if defined(_OPENMP)
     int requested_num_threads = get_num_ompthreads();
@@ -212,22 +207,18 @@ void test_get_value(Grid *g)
 
             float v1 = g->GetValue(*c_itr);
 
-            if (v0 != v1) {
-                if (v0 == 0.0) {
-                    if (abs(v1) > epsilon) { my_ecount++; }
-                } else {
-                    if (abs((v1 - v0) / v0) > epsilon) { my_ecount++; }
-                }
-            }
+
+            if (!Wasp::NearlyEqual(v0, v1)) { my_ecount++; }
             my_count++;
         }
 #pragma omp critical
         {
+            count += my_count;
             ecount += my_ecount;
         }
     }
 
-    cout << "error count: " << ecount << endl;
+    cout << "error count: " << ecount << " out of " << count << endl;
     cout << "time: " << GetTime() - t0 << endl;
     cout << endl;
 }
@@ -280,11 +271,12 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
         return;
     }
 
-    vector<double> minu, maxu;
+    VAPoR::CoordType minu = {0.0, 0.0, 0.0};
+    VAPoR::CoordType maxu = {0.0, 0.0, 0.0};
     if (opt.minu.size()) {
         VAssert(opt.minu.size() == opt.maxu.size());
-        minu = opt.minu;
-        maxu = opt.maxu;
+        Grid::CopyToArr3(opt.minu, minu);
+        Grid::CopyToArr3(opt.maxu, maxu);
     } else {
         int rc = datamgr.GetVariableExtents(ts, vname, opt.level, opt.lod, minu, maxu);
         if (rc < 0) exit(1);

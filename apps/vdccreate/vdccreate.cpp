@@ -288,15 +288,15 @@ int main(int argc, char **argv)
         if (rc < 0) exit(1);
     }
     if (!opt.ycoords.empty()) {
-        rc = read_float_vec(opt.ycoords, opt.dim.nx, ycoords);
+        rc = read_float_vec(opt.ycoords, opt.dim.ny, ycoords);
         if (rc < 0) exit(1);
     }
     if (!opt.zcoords.empty()) {
-        rc = read_float_vec(opt.zcoords, opt.dim.nx, zcoords);
+        rc = read_float_vec(opt.zcoords, opt.dim.nz, zcoords);
         if (rc < 0) exit(1);
     }
     if (!opt.tcoords.empty()) {
-        rc = read_float_vec(opt.tcoords, opt.dim.nx, tcoords);
+        rc = read_float_vec(opt.tcoords, opt.numts, tcoords);
         if (rc < 0) exit(1);
     }
 
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
     if (!opt.xcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[0], vector<string>{dimnames[0]}, "", "", 0, DC::XType::FLOAT, false); }
     if (!opt.ycoords.empty()) { rc = vdc.DefineCoordVar(dimnames[1], vector<string>{dimnames[1]}, "", "", 1, DC::XType::FLOAT, false); }
     if (!opt.zcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[2], vector<string>{dimnames[2]}, "", "", 2, DC::XType::FLOAT, false); }
-    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), "", dimnames[3], 3, DC::XType::FLOAT, false); }
+    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), dimnames[3], "", 3, DC::XType::FLOAT, false); }
 
     rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
     if (rc < 0) exit(1);

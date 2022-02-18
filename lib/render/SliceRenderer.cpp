@@ -1,7 +1,8 @@
 #include <sstream>
 #include <string>
-
+#include <limits>
 #include <ctime>
+#include <iomanip>
 
 #include <vapor/SliceRenderer.h>
 #include <vapor/SliceParams.h>
@@ -10,6 +11,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 #define X  0
 #define Y  1
@@ -18,9 +20,14 @@
 #define XZ 1
 #define YZ 2
 
-#define MAX_TEXTURE_SIZE 2000
-
 using namespace VAPoR;
+
+static vector<double> ToDoubleVec(const glm::vec3 &v)
+{
+    vector<double> c(v.length());
+    for (int i = 0; i < v.length(); i++) c[i] = v[i];
+    return c;
+}
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
 
@@ -28,11 +35,9 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 : Renderer(pm, winName, dataSetName, SliceParams::GetClassType(), SliceRenderer::GetClassType(), instanceName, dataMgr)
 {
     _initialized = false;
-    _textureSideSize = 200;
 
-    _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
-
-    _texCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
+    _windingOrder = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
+    _rectangle3D = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
 
     _VAO = 0;
     _vertexVBO = 0;
@@ -40,8 +45,7 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _colorMapTextureID = 0;
     _dataValueTextureID = 0;
 
-    _cacheParams.domainMin.resize(3, 0.f);
-    _cacheParams.domainMax.resize(3, 1.f);
+    _cacheParams.textureSampleRate = 200;
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
@@ -100,9 +104,9 @@ void SliceRenderer::_initTexCoordVBO()
 
     glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _texCoords.size(), _texCoords.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(double) * _rectangle3D.size(), _rectangle3D.data(), GL_DYNAMIC_DRAW);
 }
 
 void SliceRenderer::_initVertexVBO()
@@ -113,10 +117,10 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _windingOrder.data(), GL_STATIC_DRAW);
 }
 
-int SliceRenderer::_resetDataCache()
+void SliceRenderer::_resetCache()
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
@@ -126,23 +130,35 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.refinementLevel = p->GetRefinementLevel();
     _cacheParams.compressionLevel = p->GetCompressionLevel();
-    _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
-    _textureSideSize = _cacheParams.textureSampleRate;
-    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+    _cacheParams.xRotation = p->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0);
+    _cacheParams.yRotation = p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0);
+    _cacheParams.zRotation = p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0);
 
-    _resetBoxCache();
-    _resetColormapCache();
+    _cacheParams.xOrigin = p->GetXSlicePlaneOrigin();
+    _cacheParams.yOrigin = p->GetYSlicePlaneOrigin();
+    _cacheParams.zOrigin = p->GetZSlicePlaneOrigin();
 
-    int rc;
-    rc = _saveTextureData();
-    if (rc < 0) {
-        SetErrMsg("Unable to acquire data for Slice texture");
-        return rc;
-    }
 
-    return rc;
+    _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
+    _cacheParams.sliceOrientationMode = p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0);
+
+    _cacheParams.sliceRotation = p->GetSlicePlaneRotation();
+    _cacheParams.sliceNormal = p->GetSlicePlaneNormal();
+    _cacheParams.sliceOffset = p->GetValueDouble(p->SliceOffsetTag, 0);
+
+    _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
+    // clang-format off
+    _dataMgr->GetVariableExtents(_cacheParams.ts, 
+                                 _cacheParams.varName, 
+                                 _cacheParams.refinementLevel, 
+                                 _cacheParams.compressionLevel, 
+                                 _cacheParams.domainMin, 
+                                 _cacheParams.domainMax
+    );
+    // clang-format on
 }
 
 void SliceRenderer::_resetColormapCache()
@@ -159,218 +175,143 @@ void SliceRenderer::_resetColormapCache()
     glGenTextures(1, &_colorMapTextureID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
+#ifdef DEBUG
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+#else
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
 }
 
-int SliceRenderer::_resetBoxCache()
+// clang-format off
+
+int SliceRenderer::_regenerateSlice()
+{
+    Grid *grid3d = nullptr;
+    int   rc = _getGrid3D(grid3d);
+    if (rc < 0) return -1;
+
+    // Get data values from a slice
+    std::shared_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
+    planeDescription       pd;
+    pd.sideSize = _textureSideSize;
+
+    if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal)
+        pd.normal = _cacheParams.sliceNormal;
+    else
+        pd.normal = ToDoubleVec(ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(_cacheParams.sliceRotation));
+
+    glm::vec3 o = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
+    glm::vec3 n = {pd.normal[0], pd.normal[1], pd.normal[2]};
+    glm::vec3 offsetOrigin = o + n * (float)_cacheParams.sliceOffset;
+    pd.origin = ToDoubleVec(offsetOrigin);
+
+    pd.boxMin = _cacheParams.boxMin;
+    pd.boxMax = _cacheParams.boxMax;
+
+    VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
+
+    ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
+        grid3d,
+        pd,
+        dims
+    );
+
+    CoordType corner1, corner2, corner3, corner4;
+    slice->GetUserCoordinates( {0,                  0,                  0}, corner1);
+    slice->GetUserCoordinates( {0,                  _textureSideSize-1, 0}, corner2);
+    slice->GetUserCoordinates( {_textureSideSize-1, 0,                  0}, corner3);
+    slice->GetUserCoordinates( {_textureSideSize-1, _textureSideSize-1, 0}, corner4);
+
+    _windingOrder = {corner1[0], corner1[1], corner1[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner2[0], corner2[1], corner2[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner4[0], corner4[1], corner4[2],
+                     corner2[0], corner2[1], corner2[2]};
+
+    _rectangle3D  = {corner1[0], corner1[1], corner1[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner4[0], corner4[1], corner4[2],
+                     corner2[0], corner2[1], corner2[2]};
+
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    std::vector<CoordType> sliceQuad = { {corner1[0], corner1[1], corner1[2]},
+                                         {corner3[0], corner3[1], corner3[2]},
+                                         {corner4[0], corner4[1], corner4[2]},
+                                         {corner2[0], corner2[1], corner2[2]}};
+    p->SetSlicePlaneQuad(sliceQuad);
+
+    delete grid3d;
+    if (slice == nullptr) {
+        Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
+        return -1;
+    }
+
+    // Apply opacity to missing values
+    float missingValue = slice->GetMissingValue();
+    int                    textureSize = 2 * _textureSideSize * _textureSideSize;
+    std::unique_ptr<float> textureValues(new float[textureSize]);
+    for (size_t i = 0; i < textureSize / 2; i++) {
+        DimsType dim = {i%_textureSideSize, i/_textureSideSize, 0};
+        float dataValue = slice->GetValueAtIndex( dim );
+        if (dataValue == missingValue)
+            textureValues.get()[i * 2 + 1] = 1.f;
+        else
+            textureValues.get()[i * 2 + 1] = 0.f;
+
+        textureValues.get()[i * 2] = dataValue;
+    }
+
+    _createDataTexture(textureValues);
+
+    delete slice;
+
+    return 0;
+}
+
+// clang-format on
+
+int SliceRenderer::_getGrid3D(Grid *&grid3d) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    VAssert(p);
-    _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, _cacheParams.domainMin, _cacheParams.domainMax);
+    int          rLevel = p->GetRefinementLevel();
+    int          cLevel = p->GetCompressionLevel();
+    int          rc = DataMgrUtils::GetGrids(_dataMgr, p->GetCurrentTimestep(), p->GetVariableName(), _cacheParams.boxMin, _cacheParams.boxMax, true, &rLevel, &cLevel, &grid3d);
     if (rc < 0) {
-        SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
+        Wasp::MyBase::SetErrMsg("Unable to acquire Grid for Slice texture");
         return rc;
     }
+    VAssert(grid3d);
+    grid3d->SetInterpolationOrder(1);
 
-    _setVertexPositions();
-    _resetTextureCoordinates();
-    return rc;
+    return 0;
 }
 
-void SliceRenderer::_resetTextureCoordinates()
-{
-    float texMinX, texMinY, texMaxX, texMaxY;
-
-    std::vector<double> boxMin = _cacheParams.boxMin;
-    std::vector<double> boxMax = _cacheParams.boxMax;
-    std::vector<double> domainMin = _cacheParams.domainMin;
-    std::vector<double> domainMax = _cacheParams.domainMax;
-
-    int xAxis, yAxis;
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY) {
-        xAxis = X;
-        yAxis = Y;
-    } else if (orientation == XZ) {
-        xAxis = X;
-        yAxis = Z;
-    } else {    // (orientation = YZ)
-        xAxis = Y;
-        yAxis = Z;
-    }
-
-    texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
-    texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
-
-    _texCoords.clear();
-    _texCoords = {texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX, texMinY, texMaxX, texMaxY, texMinX, texMaxY};
-
-    glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(),
-                    _texCoords.data()    //&_texCoords[0]
-    );
-}
-
-std::vector<double> SliceRenderer::_calculateDeltas() const
-{
-    int    sampleRate = _textureSideSize;
-    double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
-    double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
-    double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
-
-    std::vector<double> deltas = {dx, dy, dz};
-    return deltas;
-}
-
-void SliceRenderer::_populateDataXY(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
-    coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
-    coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
-    coords[Z] = _cacheParams.boxMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[X] = _cacheParams.domainMin[X];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[X] += deltas[X];
-        }
-        coords[Y] += deltas[Y];
-    }
-}
-
-void SliceRenderer::_populateDataXZ(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
-    coords[X] = _cacheParams.domainMin[X];
-    coords[Y] = _cacheParams.boxMin[Y];
-    coords[Z] = _cacheParams.domainMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[X] = _cacheParams.domainMin[X];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[X] += deltas[X];
-        }
-        coords[Z] += deltas[Z];
-    }
-}
-
-void SliceRenderer::_populateDataYZ(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
-    coords[X] = _cacheParams.boxMin[X];
-    coords[Y] = _cacheParams.domainMin[Y];
-    coords[Z] = _cacheParams.domainMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[Y] = _cacheParams.domainMin[Y];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[Y] += deltas[Y];
-        }
-        coords[Z] += deltas[Z];
-    }
-}
-
-int SliceRenderer::_saveTextureData()
-{
-    Grid *grid = nullptr;
-    int   rc =
-        DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
-
-    if (rc < 0) {
-        SetErrMsg("Unable to acquire Grid for Slice texture");
-        return (rc);
-    }
-    VAssert(grid);
-
-    grid->SetInterpolationOrder(1);
-
-    _setVertexPositions();
-
-    int    textureSize = 2 * _textureSideSize * _textureSideSize;
-    float *dataValues = new float[textureSize];
-
-    if (_cacheParams.orientation == XY)
-        _populateDataXY(dataValues, grid);
-    else if (_cacheParams.orientation == XZ)
-        _populateDataXZ(dataValues, grid);
-    else if (_cacheParams.orientation == YZ)
-        _populateDataYZ(dataValues, grid);
-    else
-        VAssert(0);
-
-    _createDataTexture(dataValues);
-
-    delete[] dataValues;
-    _dataMgr->UnlockGrid(grid);
-    delete grid;
-    grid = nullptr;
-
-    return rc;
-}
-
-void SliceRenderer::_createDataTexture(float *dataValues)
+void SliceRenderer::_createDataTexture(std::unique_ptr<float> &dataValues)
 {
     if (_dataValueTextureID != 0) glDeleteTextures(1, &_dataValueTextureID);
 
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
+#ifdef DEBUG
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+#else
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues.get());
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _windingOrder.data());
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -384,20 +325,19 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.refinementLevel != p->GetRefinementLevel()) return true;
     if (_cacheParams.compressionLevel != p->GetCompressionLevel()) return true;
 
-    if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
+    if (_cacheParams.xRotation != p->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0)) return true;
+    if (_cacheParams.yRotation != p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0)) return true;
+    if (_cacheParams.zRotation != p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0)) return true;
 
-    vector<double> min, max;
-    Box *          box = p->GetBox();
-    int            orientation = box->GetOrientation();
-    if (_cacheParams.orientation != orientation) return true;
-    // Special case: if our plane shifts its position along its orthognal axis,
-    // then we will need to return true and resample our data.  If its extents
-    // change along its perimeter, then we will just reconfigure the texture
-    // coordinates via _resetBoxCache in our _paintGL routine.
-    _getModifiedExtents(min, max);
+    if (_cacheParams.xOrigin != p->GetXSlicePlaneOrigin()) return true;
+    if (_cacheParams.yOrigin != p->GetYSlicePlaneOrigin()) return true;
+    if (_cacheParams.zOrigin != p->GetZSlicePlaneOrigin()) return true;
 
-    if (min != _cacheParams.boxMin) return true;
-    if (max != _cacheParams.boxMax) return true;
+    if (_cacheParams.sliceOffset != p->GetValueDouble(p->SliceOffsetTag, 0)) return true;
+    if (_cacheParams.sliceNormal != p->GetSlicePlaneNormal()) return true;
+    if (_cacheParams.sliceOrientationMode != p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0)) return true;
+
+    if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
     return false;
 }
@@ -417,68 +357,57 @@ bool SliceRenderer::_isColormapCacheDirty() const
 
 bool SliceRenderer::_isBoxCacheDirty() const
 {
-    vector<double> min, max;
-    _getModifiedExtents(min, max);
+    VAPoR::CoordType min, max;
+    _getExtents(min, max);
 
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
     return false;
 }
 
-void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max) const
+void SliceRenderer::_getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
     Box *box = p->GetBox();
 
-    min.resize(3);
-    max.resize(3);
     box->GetExtents(min, max);
     VAssert(min.size() == 3);
     VAssert(max.size() == 3);
-
-    vector<double> sampleLocation = p->GetValueDoubleVec(p->SampleLocationTag);
-    VAssert(sampleLocation.size() == 3);
-    switch (box->GetOrientation()) {
-    case XY:
-        min[Z] = sampleLocation[Z];
-        max[Z] = sampleLocation[Z];
-        break;
-    case XZ:
-        min[Y] = sampleLocation[Y];
-        max[Y] = sampleLocation[Y];
-        break;
-    case YZ:
-        min[X] = sampleLocation[X];
-        max[X] = sampleLocation[X];
-        break;
-    default: VAssert(0);
-    }
 }
 
 int SliceRenderer::_paintGL(bool fast)
 {
     int rc = 0;
 
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+
+
+#ifdef DEBUG
+    _drawDebugPolygons();
+#endif
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
     _initializeState();
 
-    if (_isDataCacheDirty()) {
-        rc = _resetDataCache();
-        if (rc < 0) {
-            _resetState();
-            return rc;    // error message already set by _resetDataCache()
-        }
-    } else {
-        if (_isColormapCacheDirty()) _resetColormapCache();
+    if (_isDataCacheDirty() || _isBoxCacheDirty()) {
+        _resetCache();
 
-        if (_isBoxCacheDirty()) {
-            rc = _resetBoxCache();
-            if (rc < 0) {
-                _resetState();
-                return rc;    // error message already set by _resetBoxCache()
-            }
+        // If we're in fast mode, degrade the quality of the slice for better interactivity
+        if (fast) {
+            _textureSideSize = 50;
+        } else {
+            _textureSideSize = _cacheParams.textureSampleRate;
         }
+
+        int rc = _regenerateSlice();
+        if (rc < 0) return -1;
     }
+
+    if (_isColormapCacheDirty()) _resetColormapCache();
 
     _configureShader();
     if (CheckGLError() != 0) {
@@ -498,8 +427,59 @@ int SliceRenderer::_paintGL(bool fast)
     _resetState();
 
     if (CheckGLError() != 0) { return -1; }
+
     return rc;
 }
+
+#ifdef DEBUG
+void SliceRenderer::_drawDebugPolygons()
+{
+    // 3D yellow enclosing rectangle that defines the perimeter of our texture
+    // This can and often will extend beyond the Box
+    // std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+    lgl->Color4f(1., 1., 0., 1.);
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    lgl->End();
+
+
+    // Winding order
+    double *wo = _windingOrder.data();
+    lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+    lgl->Color4f(0., 1., 0., 1.);    // green
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Color4f(0., 1., 1., 1.);    // teal
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Color4f(1., 1., 1., 1.);    // white
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+
+    lgl->Color4f(.9, .9, 1., 1.);    // purple
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Color4f(1., 0., 0., 1.);    // red
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Color4f(0., 1., 1., 1.);    // yellow
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
+    lgl->End();
+}
+#endif
 
 void SliceRenderer::_configureShader()
 {
@@ -553,63 +533,4 @@ void SliceRenderer::_resetState()
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-}
-
-void SliceRenderer::_setVertexPositions()
-{
-    std::vector<double> trimmedMin(3, 0.f);
-    std::vector<double> trimmedMax(3, 1.f);
-
-    // If the box is outside of our domain, trim the vertex coordinates to be within
-    // the domain.
-    for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
-        trimmedMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
-        trimmedMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
-    }
-
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY)
-        _setXYVertexPositions(trimmedMin, trimmedMax);
-    else if (orientation == XZ)
-        _setXZVertexPositions(trimmedMin, trimmedMax);
-    else if (orientation == YZ)
-        _setYZVertexPositions(trimmedMin, trimmedMax);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _vertexCoords.data());
-}
-
-void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double zCoord = min[Z];
-
-    std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, min[X], max[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
-
-    _vertexCoords = temp;
-}
-
-void SliceRenderer::_setXZVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double              yCoord = min[Y];
-    std::vector<double> temp = {min[X], yCoord, min[Z], max[X], yCoord, min[Z], min[X], yCoord, max[Z], max[X], yCoord, min[Z], max[X], yCoord, max[Z], min[X], yCoord, max[Z]};
-
-    _vertexCoords = temp;
-}
-
-void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double              xCoord = min[X];
-    std::vector<double> temp = {xCoord, min[Y], min[Z], xCoord, max[Y], min[Z], xCoord, min[Y], max[Z], xCoord, max[Y], min[Z], xCoord, max[Y], max[Z], xCoord, min[Y], max[Z]};
-
-    _vertexCoords = temp;
-}
-
-int SliceRenderer::_getConstantAxis() const
-{
-    if (_cacheParams.orientation == XY)
-        return Z;
-    else if (_cacheParams.orientation == XZ)
-        return Y;
-    else    // (_cacheParams.orientation == XY )
-        return X;
 }

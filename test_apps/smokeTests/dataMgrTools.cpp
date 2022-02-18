@@ -93,7 +93,7 @@ void PrintVariables(const VAPoR::DataMgr &dataMgr, bool verbose, bool testVars)
     }
 }
 
-void TestVariables(VAPoR::DataMgr &dataMgr)
+void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
 {
     vector<string> vars;
     for (int d = 1; d < 4; d++) {
@@ -101,19 +101,25 @@ void TestVariables(VAPoR::DataMgr &dataMgr)
         if (vars.size()) {
             std::string varName = vars[0];
             PrintCompressionInfo(dataMgr, varName);
-            std::vector<double> minExt, maxExt;
+            VAPoR::CoordType minExt, maxExt;
             dataMgr.GetVariableExtents(0, varName, -1, -1, minExt, maxExt);
 
-            // Reduce extents to test
+            // Reduce extents about the center of the volume to speed tests
             for (int i = 0; i < minExt.size(); i++) {
-                minExt[i] /= 32.0;
-                maxExt[i] /= 32.0;
+                double center = (maxExt[i] + minExt[i]) / 2.0;
+                double width = (maxExt[i] - minExt[i]) / 32.0;
+                minExt[i] = center - (width / 2.0);
+                maxExt[i] = center + (width / 2.0);
             }
 
             VAPoR::Grid *grid = dataMgr.GetVariable(0, varName, -1, -1, minExt, maxExt);
-            double       rms;
-            size_t       numMissingValues;
-            size_t       disagreements;
+            if (!grid) {
+                cerr << "Failed to read variable " << varName << endl;
+                exit(1);
+            }
+            double rms;
+            size_t numMissingValues;
+            size_t disagreements;
             CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
             cout << "Grid test for " << d << "D variable " << varName << ":" << endl;
             cout << "    # Dimensions:       " << dataMgr.GetNumDimensions(varName) << endl;
@@ -129,12 +135,12 @@ void TestVariables(VAPoR::DataMgr &dataMgr)
             cout << "    Dimension Lengths:  " << s << endl;
             cout << "    Topology Dimension: " << dataMgr.GetVarTopologyDim(varName) << endl;
             cout << endl;
-            PrintStats(rms, numMissingValues, disagreements, 0.0);
+            PrintStats(rms, numMissingValues, disagreements, 0.0, silenceTime);
         }
     }
 }
 
-int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options)
+int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options, bool silenceTime)
 {
     VAPoR::DataMgr dataMgr(fileType, memsize, nthreads);
     int            rc = dataMgr.Initialize(files, options);
@@ -146,7 +152,7 @@ int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, co
     PrintDimensions(dataMgr);
     PrintMeshes(dataMgr);
     PrintVariables(dataMgr);
-    TestVariables(dataMgr);
+    TestVariables(dataMgr, silenceTime);
     PrintCoordVariables(dataMgr);
     PrintTimeCoordinates(dataMgr);
 

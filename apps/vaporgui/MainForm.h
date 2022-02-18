@@ -37,9 +37,9 @@
 #include <QWidgetAction>
 #include <chrono>
 #include <vapor/ControlExecutive.h>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "SettingsParams.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 #include "AnimationController.h"
 //#include "MiscParams.h"
 #include "TabManager.h"
@@ -77,7 +77,7 @@ class MainForm : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainForm(vector<QString> files, QApplication *app, bool interactive = true, QWidget *parent = 0);
+    MainForm(vector<QString> files, QApplication *app, bool interactive = true, string filesType = "auto", QWidget *parent = 0);
     ~MainForm();
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
@@ -142,10 +142,6 @@ private:
 
     // Data menu
     //
-    QAction *_dataImportWRF_Action;
-    QAction *_dataImportCF_Action;
-    QAction *_dataImportMPAS_Action;
-    QAction *_dataImportBOV_Action;
     QAction *_dataLoad_MetafileAction;
     QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
@@ -344,10 +340,6 @@ private slots:
     void helpAbout();
     void loadData(string fileName = "");
     void closeData(string fileName = "");
-    void importWRFData();
-    void importCFData();
-    void importMPASData();
-    void importBOVData();
     void sessionNew();
     void captureJpegSequence();
     void captureTiffSequence();

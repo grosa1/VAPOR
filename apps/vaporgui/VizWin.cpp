@@ -34,10 +34,10 @@
 #include <vapor/Viewpoint.h>
 #include <vapor/debug.h>
 #include <vapor/ImageParams.h>
-#include "TrackBall.h"
-#include "GUIStateParams.h"
-#include "MouseModeParams.h"
-#include "AnimationParams.h"
+#include <vapor/TrackBall.h>
+#include <vapor/GUIStateParams.h>
+#include <vapor/MouseModeParams.h>
+#include <vapor/AnimationParams.h>
 #include "qdatetime.h"
 #include "ErrorReporter.h"
 #include "RenderEventRouterGUI.h"
@@ -52,11 +52,15 @@
 #include "vapor/FileUtils.h"
 #include "vapor/Visualizer.h"
 #include <vapor/FlowParams.h>
+#include <vapor/SliceParams.h>
+#include <vapor/ContourParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 #include "hide_std_error_util.h"
 
 using namespace VAPoR;
+
+#define ORIGIN_TIC_WIDTH .03
 
 /*
  *  Constructs a VizWindow as a child of 'parent', with the
@@ -144,7 +148,7 @@ void VizWin::_getNearFarDist(const double posVec[3], const double dirVec[3], dou
     AnimationParams *p = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = p->GetCurrentTimestep();
 
-    vector<double> minExts, maxExts;
+    VAPoR::CoordType minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, _winName, ts, minExts, maxExts);
 
     for (int i = 0; i < 3; i++) camPosBox[i] = posVec[i];
@@ -202,8 +206,8 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
-    width *= QApplication::desktop()->devicePixelRatio();
-    height *= QApplication::desktop()->devicePixelRatio();
+    width *= QApplication::desktop()->devicePixelRatioF();
+    height *= QApplication::desktop()->devicePixelRatioF();
     int wWidth = width;
     int wHeight = height;
 
@@ -349,6 +353,9 @@ void VizWin::_mousePressEventManip(QMouseEvent *e)
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
+    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+
     _manipFlag = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
 }
 
@@ -433,6 +440,10 @@ void VizWin::_mouseReleaseEventManip(QMouseEvent *e)
     if (!_manipFlag) return;
 
     std::vector<double> screenCoords = _getScreenCoords(e);
+
+    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
     _setNewExtents();
 
@@ -491,6 +502,9 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e)
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
+    screenCoords[0] *= QApplication::desktop()->devicePixelRatioF();
+    screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
+
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
     Render(true);
 }
@@ -532,7 +546,7 @@ string VizWin::_getCurrentMouseMode() const
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
 
     string activeTab = guiP->ActiveTab();
-    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName)
+    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName || activeTab == FlowEventRouter::IntegrationTabName)
         return MouseModeParams::GetRegionModeName();
     else
         return MouseModeParams::GetNavigateModeName();
@@ -572,6 +586,10 @@ void VizWin::_setNewExtents()
                 fp->SetRake(b);
             }
         }
+    } else if (_manipFlowIntegrationFlag) {
+        FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
+        VAssert(fp);
+        fp->GetIntegrationBox()->SetExtents(llc, urc);
     } else {
         box->SetExtents(llc, urc);
     }
@@ -648,6 +666,8 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
+        if (_getRenderParams() && _getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
+        if (dynamic_cast<ContourParams *>(_getRenderParams()) || dynamic_cast<SliceParams *>(_getRenderParams())) _drawContourSliceQuad();
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -724,31 +744,15 @@ string VizWin::_getCurrentDataMgrName() const
     return dataSetName;
 }
 
-void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, std::vector<double> &minExts, std::vector<double> &maxExts)
+void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, CoordType &minExts, CoordType &maxExts)
 {
     vector<string> fieldVars = rParams->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        std::vector<double> tmpMin, tmpMax;
-        string              varName = fieldVars[i];
-        if (varName == "") continue;
-
-        dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, tmpMin, tmpMax);
-
-        if (minExts.size() == 0) {
-            for (int j = 0; j < 3; j++) {
-                minExts = tmpMin;
-                maxExts = tmpMax;
-            }
-        } else {
-            for (int j = 0; j < 3; j++) {
-                if (tmpMin[j] < minExts[j]) minExts[j] = tmpMin[j];
-                if (tmpMax[j] > maxExts[j]) maxExts[j] = tmpMax[j];
-            }
-        }
-    }
+    vector<int>    axes;
+    bool           ok = DataMgrUtils::GetExtents(dataMgr, timeStep, fieldVars, refLevel, lod, minExts, maxExts, axes);
+    VAssert(ok);
 }
 
-void VizWin::_getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts)
+void VizWin::_getActiveExtents(CoordType &minExts, CoordType &maxExts)
 {
     VAPoR::RenderParams *rParams = _getRenderParams();
     if (rParams == NULL) return;
@@ -787,12 +791,12 @@ VAPoR::Transform *VizWin::_getDataMgrTransform() const
 
 void VizWin::updateManip(bool initialize)
 {
-    std::vector<double> minExts(3, (std::numeric_limits<double>::max)());
-    std::vector<double> maxExts(3, std::numeric_limits<double>::lowest());
+    CoordType minExts = {0.0, 0.0, 0.0};
+    CoordType maxExts = {0.0, 0.0, 0.0};
 
     _getActiveExtents(minExts, maxExts);
 
-    std::vector<double>  llc, urc;
+    CoordType            llc, urc;
     string               classType;
     VAPoR::RenderParams *rParams = _getRenderParams(classType);
     if (initialize || rParams == NULL) {
@@ -800,10 +804,12 @@ void VizWin::updateManip(bool initialize)
         urc = maxExts;
     } else {
         _manipFlowSeedFlag = false;
+        _manipFlowIntegrationFlag = false;
         GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
         if (rParams->GetName() == FlowParams::GetClassType()) {
             if (gp->ActiveTab() == FlowEventRouter::SeedingTabName) _manipFlowSeedFlag = true;
+            if (gp->ActiveTab() == FlowEventRouter::IntegrationTabName) _manipFlowIntegrationFlag = true;
         }
         if (_manipFlowSeedFlag) {
             FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
@@ -831,14 +837,16 @@ void VizWin::updateManip(bool initialize)
                 b.push_back(defaultZ);
             }
 
-            llc.resize(3);
-            urc.resize(3);
             llc[0] = b[0];
             urc[0] = b[1];
             llc[1] = b[2];
             urc[1] = b[3];
             llc[2] = b[4];
             urc[2] = b[5];
+        } else if (_manipFlowIntegrationFlag) {
+            FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
+            VAssert(fp);
+            fp->GetIntegrationBox()->GetExtents(llc, urc);
         } else {
             VAPoR::Box *box = rParams->GetBox();
             box->GetExtents(llc, urc);
@@ -852,9 +860,99 @@ void VizWin::updateManip(bool initialize)
     VAPoR::Transform *rpTransform = NULL;
     if (rParams != NULL) rpTransform = rParams->GetTransform();
 
-    _manip->Update(llc, urc, minExts, maxExts, rpTransform, dmTransform, constrain);
+    vector<double> llcVec = {llc[0], llc[1], llc[2]};
+    vector<double> urcVec = {urc[0], urc[1], urc[2]};
+    vector<double> minExtsVec = {minExts[0], minExts[1], minExts[2]};
+    vector<double> maxExtsVec = {maxExts[0], maxExts[1], maxExts[2]};
+
+    _manip->Update(llcVec, urcVec, minExtsVec, maxExtsVec, rpTransform, dmTransform, constrain);
 
     if (!initialize) _manip->Render();
 
     GL_ERR_BREAK();
+}
+
+void VizWin::_updateOriginGlyph()
+{
+    _glManager->matrixManager->PushMatrix();
+    Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
+    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+
+    VAPoR::RenderParams *rp = _getRenderParams();
+    double               xOrigin = rp->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0.);
+    double               yOrigin = rp->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0.);
+    double               zOrigin = rp->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0.);
+
+    std::vector<double> scales = _getDataMgrTransform()->GetScales();
+    std::vector<double> scales2 = rp->GetTransform()->GetScales();
+    scales[0] *= scales2[0];
+    scales[1] *= scales2[1];
+    scales[2] *= scales2[2];
+
+    int            refLevel = rp->GetRefinementLevel();
+    int            lod = rp->GetCompressionLevel();
+    string         varName = rp->GetVariableName();
+    vector<string> fieldVars = rp->GetFieldVariableNames();
+
+    int timeStep = rp->GetCurrentTimestep();
+
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    string      dataMgrName = _getCurrentDataMgrName();
+    DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
+
+    CoordType min, max;
+    dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
+
+    // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
+    // origin marker's crosshairs.
+    double              p = .03 * ((max[0] - min[0]) + (max[1] - min[1])) / 2;
+    std::vector<double> width = {p / scales[0], p / scales[1], p / scales[2]};
+
+    int depthFunc;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color4f(1., 1., 0., 1.);
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin - width[2]);
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin + width[2]);
+    lgl->End();
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin - width[0], yOrigin, zOrigin);
+    lgl->Vertex3f(xOrigin + width[0], yOrigin, zOrigin);
+    lgl->End();
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin, yOrigin - width[1], zOrigin);
+    lgl->Vertex3f(xOrigin, yOrigin + width[1], zOrigin);
+    lgl->End();
+
+    glDepthFunc(depthFunc);
+    _glManager->matrixManager->PopMatrix();
+}
+
+void VizWin::_drawContourSliceQuad()
+{
+    /*ContourParams *cp = dynamic_cast<ContourParams *>(_getRenderParams());
+    assert(cp);
+    if (!cp) return;*/
+
+    _glManager->matrixManager->PushMatrix();
+    Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
+    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+
+    auto quad = _getRenderParams()->GetSlicePlaneQuad();
+
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color3f(0, 1, 0);
+    lgl->Begin(GL_LINE_STRIP);
+    for (auto v : quad) lgl->Vertex3dv(v.data());
+    if (quad.size()) lgl->Vertex3dv(quad[0].data());
+    lgl->End();
+    _glManager->matrixManager->PopMatrix();
 }

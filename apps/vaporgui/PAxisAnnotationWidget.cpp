@@ -7,7 +7,7 @@
 #include "V3DInput.h"
 #include "V3DIntInput.h"
 #include "VLineItem.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 #include "ErrorReporter.h"
 
 PAxisAnnotationWidget::PAxisAnnotationWidget(VAPoR::ControlExec *controlExec) : PWidget("", _group = new VGroup())
@@ -118,7 +118,7 @@ std::vector<double> PAxisAnnotationWidget::_getDomainExtents() const
     VAssert(aParams);
     int                 ts = aParams->GetCurrentTimestep();
     VAPoR::DataStatus * dataStatus = _controlExec->GetDataStatus();
-    std::vector<double> minExts, maxExts;
+    VAPoR::CoordType    minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
 
     std::vector<double> extents = {minExts[0], minExts[1], minExts[2], maxExts[0], maxExts[1], maxExts[2]};

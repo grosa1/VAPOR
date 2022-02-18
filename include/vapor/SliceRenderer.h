@@ -9,11 +9,15 @@
     #include <GL/gl.h>
 #endif
 
+#include <glm/glm.hpp>
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
+//#define DEBUG 1
+
 namespace VAPoR {
+
 
 class RENDER_API SliceRenderer : public Renderer {
 public:
@@ -36,11 +40,21 @@ private:
         int                 compressionLevel;
         int                 textureSampleRate;
         int                 orientation;
+        double              xRotation;
+        double              yRotation;
+        double              zRotation;
+        double              xOrigin;
+        double              yOrigin;
+        double              zOrigin;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
-        std::vector<double> boxMin, boxMax;
-        std::vector<double> domainMin, domainMax;
+        VAPoR::CoordType    boxMin, boxMax;
+        VAPoR::CoordType    domainMin, domainMax;
         std::vector<double> sampleLocation;
+        std::vector<double> sliceRotation;
+        std::vector<double> sliceNormal;
+        double              sliceOffset;
+        int                 sliceOrientationMode;
     } _cacheParams;
 
     void _initVAO();
@@ -50,44 +64,28 @@ private:
     bool _isColormapCacheDirty() const;
     bool _isDataCacheDirty() const;
     bool _isBoxCacheDirty() const;
-    void _getModifiedExtents(vector<double> &min, vector<double> &max) const;
-    int  _saveCacheParams();
+    void _getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const;
     void _resetColormapCache();
-    int  _resetBoxCache();
-    int  _resetDataCache();
-    void _initTextures();
-    void _createDataTexture(float *dataValues);
-    int  _saveTextureData();
-    void _populateDataXY(float *dataValues, Grid *grid) const;
-    void _populateDataXZ(float *dataValues, Grid *grid) const;
-    void _populateDataYZ(float *dataValues, Grid *grid) const;
-
-    double _newWaySeconds;
-    double _newWayInlineSeconds;
-    double _oldWaySeconds;
-
-    std::vector<double> _calculateDeltas() const;
-
-    int _getConstantAxis() const;
+    void _resetCache();
+    void _createDataTexture(std::unique_ptr<float> &dataValues);
+    int  _regenerateSlice();
+    int  _getGrid3D(Grid *&grid) const;
+#ifdef DEBUG
+    void _drawDebugPolygons();
+#endif
 
     void _configureShader();
     void _resetState();
     void _initializeState();
-    void _resetTextureCoordinates();
 
-    void _setVertexPositions();
-    void _setXYVertexPositions(std::vector<double> min, std::vector<double> max);
-    void _setXZVertexPositions(std::vector<double> min, std::vector<double> max);
-    void _setYZVertexPositions(std::vector<double> min, std::vector<double> max);
-
-    bool _initialized;
-    int  _textureSideSize;
+    bool   _initialized;
+    size_t _textureSideSize;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
 
-    std::vector<double> _vertexCoords;
-    std::vector<float>  _texCoords;
+    std::vector<double> _windingOrder;
+    std::vector<double> _rectangle3D;
 
     GLuint _VAO;
     GLuint _vertexVBO;

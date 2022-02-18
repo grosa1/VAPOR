@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
-#include <cctype>    // std::isspace
 #include <random>
 #include <algorithm>
 #include <vapor/Progress.h>
@@ -49,7 +48,6 @@ std::string FlowRenderer::_getColorbarVariableName() const { return GetActivePar
 
 int FlowRenderer::_initializeGL()
 {
-    // First prepare the VelocityField
     _velocityField.AssignDataManager(_dataMgr);
     _colorField.AssignDataManager(_dataMgr);
     _timestamps = _dataMgr->GetTimeCoordinates();
@@ -167,10 +165,13 @@ int FlowRenderer::_paintGL(bool fast)
     if (params->GetNeedFlowlineOutput()) {
         rv = _outputFlowLines();
         params->SetNeedFlowlineOutput(false);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv != 0) return rv;
     }
 
-    if (_updateFlowCacheAndStates(params) != 0) {
+    rv = _updateFlowCacheAndStates(params);
+    if (rv != 0) {
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         MyBase::SetErrMsg("Parameters not ready!");
         return flow::PARAMS_ERROR;
     }
@@ -197,9 +198,10 @@ int FlowRenderer::_paintGL(bool fast)
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
         if (rv == flow::FIELD_ALL_ZERO) {
-            MyBase::SetErrMsg("The velocity field seems to contain only invalid values!");
+            MyBase::SetErrMsg("The velocity field seems to contain only zero values!");
             return flow::PARAMS_ERROR;
         } else if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update deltaT failed!");
             return rv;
         }
@@ -216,6 +218,7 @@ int FlowRenderer::_paintGL(bool fast)
             rv = _genSeedsFromList(seeds);
 
         if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Generating seeds failed!");
             return flow::NO_SEED_PARTICLE_YET;
         }
@@ -226,6 +229,7 @@ int FlowRenderer::_paintGL(bool fast)
         _advection.UseSeedParticles(seeds);
         rv = _updateAdvectionPeriodicity(&_advection);
         if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update Advection Periodicity failed!");
             return flow::GRID_ERROR;
         }
@@ -234,6 +238,7 @@ int FlowRenderer::_paintGL(bool fast)
             _2ndAdvection->UseSeedParticles(seeds);
             rv = _updateAdvectionPeriodicity(_2ndAdvection.get());
             if (rv != 0) {
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
                 MyBase::SetErrMsg("Update Advection Periodicity failed!");
                 return flow::GRID_ERROR;
             }
@@ -288,16 +293,56 @@ int FlowRenderer::_paintGL(bool fast)
         // Advection scheme 2: advect to a certain timestamp.
         // This scheme is used for unsteady flow
         else {
-            for (int i = 1; i <= _cache_currentTS; i++) { rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i)); }
+            for (int i = 1; i <= _cache_currentTS; i++) {
+                rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i));
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+            }
         }
 
         _advectionComplete = true;
     }
 
     if (!_coloringComplete) {
-        rv = _advection.CalculateParticleValues(&_colorField, true);
-        if (_2ndAdvection)    // bi-directional advection
-            rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+        bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
+        bool setAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+
+        if (integrate) {
+            vector<double> integrationVolumeMin, integrationVolumeMax;
+            params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
+            float distScale = params->GetValueDouble(params->_integrationScalarTag, 1.f);
+            rv = _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+
+            if (setAllToFinalValue) {
+                int numSamplesPerStream;
+                if (_cache_isSteady)
+                    numSamplesPerStream = _cache_steadyNumOfSteps;
+                else
+                    numSamplesPerStream = _cache_currentTS;
+                _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
+                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
+            }
+
+            vector<double> histoRange;
+            vector<long>   histo(256);
+            _advection.CalculateParticleHistogram(histoRange, histo);
+
+            params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", histo);
+            params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", histoRange);
+        } else {
+            rv = _advection.CalculateParticleValues(&_colorField, true);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+
+            if (params->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
+                params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", {});
+                params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", {});
+            }
+        }
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         _coloringComplete = true;
     }
 
@@ -310,8 +355,9 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy(&_advection, params, fast);
-        /* If the advection is bi-directional */
-        if (_2ndAdvection) _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+        if (_2ndAdvection) {    // If the advection is bi-directional
+            _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+        }
     } else {
         // Workaround for how bi-directional was implemented.
         // The rendering caches the flow data on the GPU however it
@@ -321,14 +367,21 @@ int FlowRenderer::_paintGL(bool fast)
         if (_2ndAdvection) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
         rv |= _renderAdvection(&_advection);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         /* If the advection is bi-directional */
         if (_2ndAdvection) {
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
             rv |= _renderAdvection(_2ndAdvection.get());
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
         }
     }
 
     _restoreGLState();
+
+    // Release grids that are acquired during this paint event
+    // before their DataMgr is destroyed by others.
+    _velocityField.ReleaseLockedGrids();
+    _colorField.ReleaseLockedGrids();
 
     return rv;
 }
@@ -431,7 +484,7 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
-        vector<double> mind, maxd;
+        CoordType mind, maxd;
 
         // Need to find a non-empty variable from color mapping or velocity variables.
         std::string nonEmptyVarName = rp->GetColorMapVariableName();
@@ -838,6 +891,19 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         }
     }
 
+    const auto doIntegration = params->GetValueLong(params->_doIntegrationTag, false);
+    const auto integrationSetAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+    const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
+    const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);
+    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar
+        || integrationVolume != _cache_integrationVolume) {
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    _cache_doIntegration = doIntegration;
+    _cache_integrationSetAllToFinalValue = integrationSetAllToFinalValue;
+    _cache_integrationDistScalar = integrationDistScalar;
+    _cache_integrationVolume = integrationVolume;
+
     //
     // Now we branch into steady and unsteady cases, and treat them separately
     //
@@ -849,6 +915,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_velocityStatus == FlowStatus::UPTODATE) _velocityStatus = FlowStatus::TIME_STEP_OOD;
             }
             if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            if (params->GetSteadyNumOfSteps() < _cache_steadyNumOfSteps && doIntegration) _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if (_cache_currentTS != params->GetCurrentTimestep()) {
@@ -1045,8 +1112,8 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     VAssert(_cache_rake.size() == 6 || _cache_rake.size() == 4);
     int dim = _cache_rake.size() / 2;
     for (int i = 0; i < dim; i++) VAssert(_cache_rake[i * 2 + 1] >= _cache_rake[i * 2]);
-    std::vector<double> rakeExtMin(dim, 0);
-    std::vector<double> rakeExtMax(dim, 0);
+    CoordType rakeExtMin = {0.0, 0.0, 0.0};
+    CoordType rakeExtMax = {0.0, 0.0, 0.0};
     for (int i = 0; i < dim; i++) {
         rakeExtMin[i] = _cache_rake[i * 2];
         rakeExtMax[i] = _cache_rake[i * 2 + 1];
@@ -1213,18 +1280,11 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
     return 0;
 }
 
-void FlowRenderer::_printFlowStatus(const std::string &prefix, FlowStatus stat) const
+void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
 {
-    std::cout << prefix << " :  ";
-    if (stat == FlowStatus::SIMPLE_OUTOFDATE)
-        std::cout << "simple out-of-date";
-    else if (stat == FlowStatus::TIME_STEP_OOD)
-        std::cout << "time step out-of-date";
-    else if (stat == FlowStatus::UPTODATE)
-        std::cout << "up to date";
-    std::cout << std::endl;
-}
-
-#ifndef WIN32
-double FlowRenderer::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
+#ifndef NDEBUG
+    if (rtn != 0) {    // only print non-zero values
+        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
+    }
 #endif
+}

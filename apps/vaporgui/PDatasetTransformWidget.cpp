@@ -1,7 +1,7 @@
 #include "PDatasetTransformWidget.h"
 #include <vapor/ControlExecutive.h>
 #include <vapor/STLUtils.h>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "VSection.h"
 #include "PStringDropdown.h"
 #include "PTransformWidget.h"
@@ -27,6 +27,7 @@ void PDatasetTransformWidget::updateGUI() const
     auto             stateParams = ((GUIStateParams *)pm->GetParams(GUIStateParams::GetClassType()));
     auto             activeViz = stateParams->GetActiveVizName();
     ViewpointParams *vp = pm->GetViewpointParams(activeViz);
+    if (!vp) return;
 
     DataStatus *   dataStatus = _ce->GetDataStatus();
     vector<string> datasets = dataStatus->GetDataMgrNames();

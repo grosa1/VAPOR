@@ -68,6 +68,7 @@
 #include <vapor/DCP.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCBOV.h>
+#include <vapor/DCUGRID.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -95,8 +96,8 @@
 
 #include <vapor/XmlNode.h>
 #include <vapor/Base16StringStream.h>
-#include "BookmarkParams.h"
-#include "NavigationUtils.h"
+#include <vapor/BookmarkParams.h>
+#include <vapor/NavigationUtils.h>
 
 #include <memory>
 
@@ -208,9 +209,6 @@ void MainForm::_initMembers()
     _installCLIToolsAction = NULL;
     _webDocumentationAction = NULL;
 
-    _dataImportWRF_Action = NULL;
-    _dataImportCF_Action = NULL;
-    _dataImportMPAS_Action = NULL;
     _dataLoad_MetafileAction = NULL;
     _dataClose_MetafileAction = NULL;
     _plotAction = NULL;
@@ -323,7 +321,7 @@ public:
 
 // Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, QWidget *parent) : QMainWindow(parent)
+MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _initMembers();
 
@@ -467,11 +465,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
         for (auto &f : files) paths.push_back(f.toStdString());
 
         string fmt;
-        if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
+
+        if (filesType == "auto") {
+            if (!determineDatasetFormat(paths, &fmt)) {
+                fmt = "";
+                MSG_ERR("Could not determine dataset format for command line parameters");
+            }
         } else {
-            MSG_ERR("Could not determine dataset format for command line parameters");
+            fmt = filesType;
         }
+
+        if (!fmt.empty()) loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
 
         _stateChangeCB();
     }
@@ -561,21 +565,21 @@ template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::str
 
 bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
 {
-    if (isDatasetValidFormat<VDCNetCDF>(paths))
-        *fmt = "vdc";
-    else if (isDatasetValidFormat<DCWRF>(paths))
-        *fmt = "wrf";
-    else if (isDatasetValidFormat<DCMPAS>(paths))
-        *fmt = "mpas";
-    else if (isDatasetValidFormat<DCP>(paths))
-        *fmt = "dcp";
-    else if (isDatasetValidFormat<DCCF>(paths))
-        *fmt = "cf";
-    else if (isDatasetValidFormat<DCBOV>(paths))
-        *fmt = "bov";
-    else
-        return false;
-    return true;
+    vector<pair<string, bool>> formats = {
+        {"vdc", isDatasetValidFormat<VDCNetCDF>(paths)}, {"wrf", isDatasetValidFormat<DCWRF>(paths)}, {"mpas", isDatasetValidFormat<DCMPAS>(paths)}, {"dcp", isDatasetValidFormat<DCP>(paths)},
+        {"ugrid", isDatasetValidFormat<DCUGRID>(paths)}, {"cf", isDatasetValidFormat<DCCF>(paths)},   {"bov", isDatasetValidFormat<DCBOV>(paths)},
+    };
+
+    int nOk = 0;
+    for (auto &f : formats) {
+        if (f.second) {
+            nOk++;
+            *fmt = f.first;
+        }
+    }
+    if (nOk == 1) return true;
+    MyBase::SetErrMsg("Unable to confidently determine the dataset format. Please load it manually in the GUI");
+    return false;
 }
 
 void MainForm::CheckForUpdates()
@@ -684,28 +688,22 @@ void MainForm::_createAnimationToolBar()
 void MainForm::_createVizToolBar()
 {
     // Actions for the viztoolbar:
-    QPixmap *homeIcon = new QPixmap(home);
-    _homeAction = new QAction(*homeIcon, QString(tr("Go to Home Viewpoint  ")), this);
+    _homeAction = new QAction(QPixmap(home), QString(tr("Go to Home Viewpoint  ")), this);
     _homeAction->setShortcut(QKeySequence(tr("Ctrl+H")));
     _homeAction->setShortcut(Qt::CTRL + Qt::Key_H);
 
-    QPixmap *sethomeIcon = new QPixmap(sethome);
-    _sethomeAction = new QAction(*sethomeIcon, "Set Home Viewpoint", this);
+    _sethomeAction = new QAction(QPixmap(sethome), "Set Home Viewpoint", this);
 
-    QPixmap *eyeIcon = new QPixmap(eye);
-    _viewAllAction = new QAction(*eyeIcon, QString(tr("View All  ")), this);
+    _viewAllAction = new QAction(QPixmap(eye), QString(tr("View All  ")), this);
     _viewAllAction->setShortcut(QKeySequence(tr("Ctrl+V")));
     _viewAllAction->setShortcut(Qt::CTRL + Qt::Key_V);
 
-    QPixmap *magnifyIcon = new QPixmap(magnify);
-    _viewRegionAction = new QAction(*magnifyIcon, "View Region", this);
+    _viewRegionAction = new QAction(QPixmap(magnify), "View Region", this);
 
-    QPixmap *tileIcon = new QPixmap(tiles);
-    _tileAction = new QAction(*tileIcon, QString(tr("Tile Windows  ")), this);
+    _tileAction = new QAction(QPixmap(tiles), QString(tr("Tile Windows  ")), this);
     _tileAction->setShortcut(Qt::CTRL + Qt::Key_T);
 
-    QPixmap *cascadeIcon = new QPixmap(cascade);
-    _cascadeAction = new QAction(*cascadeIcon, "Cascade Windows", this);
+    _cascadeAction = new QAction(QPixmap(cascade), "Cascade Windows", this);
 
     // Viz tool bar:
     //
@@ -873,21 +871,6 @@ void MainForm::_createFileMenu()
     _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
 
-    _dataImportWRF_Action = new QAction(this);
-    _dataImportWRF_Action->setText(tr("WRF-ARW"));
-    _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into "
-                                      "the current session");
-
-    _dataImportCF_Action = new QAction(this);
-    _dataImportCF_Action->setText(tr("NetCDF-CF"));
-    _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention "
-                                     "output files to import into the current session");
-
-    _dataImportMPAS_Action = new QAction(this);
-    _dataImportMPAS_Action->setText(tr("MPAS"));
-    _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
-                                       "current session");
-
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
     _fileSaveAction = new QAction(this);
@@ -926,11 +909,12 @@ void MainForm::_createFileMenu()
     //
 
     _importMenu = _File->addMenu("Import");
-    _importMenu->addAction(_dataImportWRF_Action);
-    _importMenu->addAction(_dataImportCF_Action);
-    _importMenu->addAction(_dataImportMPAS_Action);
+    _importMenu->addAction("WRF-ARW", this, [this]() { loadDataHelper("", {}, "WRF-ARW files", "", "wrf", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("NetCDF-CF", this, [this]() { loadDataHelper("", {}, "NetCDF Climate Forecast (CF) convention files", "", "cf", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("MPAS", this, [this]() { loadDataHelper("", {}, "MPAS files", "", "mpas", true, DatasetExistsAction::Prompt); });
     _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
     _importMenu->addAction("Data Collection Particles (DCP)", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("Unstructured Grid (UGRID)", this, [this]() { loadDataHelper("", {}, "UGRID files", "", "ugrid", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -942,10 +926,6 @@ void MainForm::_createFileMenu()
     _File->addAction(_fileExitAction);
 
     connect(_dataLoad_MetafileAction, SIGNAL(triggered()), this, SLOT(loadData()));
-    connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
-    connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
-    connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
-
     connect(_fileNew_SessionAction, SIGNAL(triggered()), this, SLOT(sessionNew()));
     connect(_fileOpenAction, SIGNAL(triggered()), this, SLOT(sessionOpen()));
     connect(_fileSaveAction, SIGNAL(triggered()), this, SLOT(fileSave()));
@@ -1752,32 +1732,6 @@ void MainForm::closeData(string fileName)
     _controlExec->UndoRedoClear();
 
     if (!_controlExec->GetDataNames().size()) { sessionNew(); }
-}
-
-// import WRF data into current session
-//
-void MainForm::importWRFData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "WRF-ARW NetCDF files", "", "wrf", true);
-}
-
-void MainForm::importCFData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "NetCDF CF files", "", "cf", true);
-}
-
-void MainForm::importMPASData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "MPAS files", "", "mpas", true);
-}
-
-void MainForm::importBOVData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "BOV files", "", "bov", false);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)

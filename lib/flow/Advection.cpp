@@ -181,11 +181,14 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
 
     bool   happened = false;
     size_t streamIdx = 0;
+    size_t maxSteps = 10000;
     for (auto &s : _streams)    // Process one stream at a time
     {
         Particle p0 = s.back();    // Start from the last particle in this stream
         if (p0.time < startT)      // Skip this stream if it didn't advance to startT
             continue;
+
+        size_t thisStep = 0;
 
         while (p0.time < targetT) {
             // Check if the particle is inside of the volume.
@@ -239,20 +242,28 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, p0, dt, p1); break;
             case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, p0, dt, p1); break;
             }
-            if (rv != 0)    // Advection wasn't successful for some reason...
-            {
+            if (rv != 0) {    // Advection wasn't successful for some reason...
                 break;
-            } else    // Advection successful, keep the new particle.
-            {
+            } else {    // Advection successful, keep the new particle.
                 happened = true;
                 s.push_back(p1);
                 p0 = std::move(p1);
             }
-        }    // Finish the while loop to advect one particle to a time
+
+            // Another termination criterion: when advecting at least 10,000 steps and
+            // more than 10X more than the previous max num of steps.
+            //
+            if (++thisStep == maxSteps) {
+                thisStep = maxSteps / 10;
+                break;
+            }
+        }    // Finish advecting one particle
+
+        maxSteps = std::max(maxSteps, thisStep * 10);
 
         streamIdx++;
 
-    }    // Finish the for loop to advect all particles to a time
+    }    // Finish advecting all particles
 
     if (happened)
         return ADVECT_HAPPENED;
@@ -314,6 +325,108 @@ int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero)
     return 0;
 }
 
+
+int Advection::CalculateParticleIntegratedValues(Field *scalar, const bool skipNonZero, const float distScale, const std::vector<double> &integrateWithinVolumeMin,
+                                                 const std::vector<double> &integrateWithinVolumeMax)
+{
+    // For steady fields, we calculate values one stream at a time
+    if (scalar->IsSteady) {
+        if (scalar->LockParams() != 0) return PARAMS_ERROR;
+
+        _valueVarName = scalar->ScalarName;
+
+        for (auto &s : _streams) {
+            if (s.size() && !s[0].IsSpecial()) s[0].value = 0;
+
+            for (int i = 1; i < s.size(); i++) {
+                auto &prev = s[i - 1];
+                auto &p = s[i];
+                _calculateParticleIntegratedValue(p, prev, scalar, skipNonZero, distScale, integrateWithinVolumeMin, integrateWithinVolumeMax);
+            }
+        }
+
+        scalar->UnlockParams();
+    }
+    // For unsteady fields, we calculate values at one timestep at a time
+    else {
+        size_t mostSteps = 0;
+        for (auto &s : _streams) {
+            if (s.size() > mostSteps) mostSteps = s.size();
+        }
+
+        _valueVarName = scalar->ScalarName;
+
+        for (auto &s : _streams)
+            if (s.size() && !s[0].IsSpecial()) s[0].value = 0;
+
+        for (size_t i = 1; i < mostSteps; i++) {
+            for (auto &s : _streams) {
+                if (i < s.size()) {
+                    auto &prev = s[i - 1];
+                    auto &p = s[i];
+                    _calculateParticleIntegratedValue(p, prev, scalar, skipNonZero, distScale, integrateWithinVolumeMin, integrateWithinVolumeMax);
+                }
+            }    // end of a stream
+        }        // end of all steps
+    }
+
+    return 0;
+}
+
+void Advection::_calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale,
+                                                  const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const
+{
+    // Skip this particle if it is a separator
+    if (p.IsSpecial()) return;
+    if (prev.IsSpecial()) {
+        p.value = 0;
+        return;
+    }
+
+    // Do not evaluate this particle if its value is non-zero
+    if (skipNonZero && p.value != 0.0f) return;
+
+    if (!_isParticleInsideVolume(p, integrateWithinVolumeMin, integrateWithinVolumeMax)) {
+        p.value = prev.value;
+        return;
+    }
+
+    float value;
+    int   rv = scalarField->GetScalar(p.time, p.location, value);
+    if (rv != 0) {    // If non-0, then outside the volume
+        p.value = prev.value;
+        return;
+    }
+
+    float dist = glm::distance(prev.location, p.location);
+    p.value = prev.value + value * dist * distScale;
+}
+
+void Advection::SetAllStreamValuesToFinalValue(int realNSamples)
+{
+    for (auto &s : _streams) {
+        float finalValue = 0;
+
+        int sampleCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                finalValue = p.value;
+                sampleCount++;
+            }
+            if (sampleCount == realNSamples) break;
+        }
+
+        int setCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                p.value = finalValue;
+                setCount++;
+            }
+            if (setCount == sampleCount) break;
+        }
+    }
+}
+
 int Advection::CalculateParticleProperties(Field *scalar)
 {
     // Test if this scalar property is already calculated.
@@ -367,6 +480,30 @@ int Advection::CalculateParticleProperties(Field *scalar)
     }
 
     return 0;
+}
+
+void Advection::CalculateParticleHistogram(std::vector<double> &outBounds, std::vector<long> &bins)
+{
+    std::vector<float> samples;
+
+    for (const auto &s : _streams)
+        for (const auto &p : s)
+            if (!p.IsSpecial()) samples.push_back(p.value);
+
+    auto  bounds = std::minmax_element(samples.begin(), samples.end());
+    float minValue = *bounds.first;
+    float maxValue = *bounds.second;
+    float range = maxValue - minValue;
+
+    int nBins = bins.size();
+    assert(nBins != 0);
+    std::fill(bins.begin(), bins.end(), 0);
+
+    for (const auto &s : samples) { bins[std::min(nBins - 1, std::max(0, (int)((nBins - 1) * (s - minValue) / range)))]++; }
+
+    outBounds.resize(2);
+    outBounds[0] = minValue;
+    outBounds[1] = maxValue;
 }
 
 int Advection::_advectEuler(Field *velocity, const Particle &p0, double dt, Particle &p1) const
@@ -465,8 +602,11 @@ void Advection::RemoveParticleProperty(const std::string &varToRemove)
 
 void Advection::ResetParticleValues()
 {
-    for (auto &stream : _streams)
-        for (auto &part : stream) part.value = 0.0f;
+    for (auto &stream : _streams) {
+        std::for_each(stream.begin(), stream.end(), [](Particle &p) {
+            if (!p.IsSpecial()) p.value = 0.0f;
+        });
+    }
 }
 
 void Advection::SetXPeriodicity(bool isPeri, float min, float max)
@@ -519,3 +659,10 @@ float Advection::_applyPeriodic(float val, float min, float max) const
 auto Advection::GetValueVarName() const -> std::string { return _valueVarName; }
 
 auto Advection::GetPropertyVarNames() const -> std::vector<std::string> { return _propertyVarNames; }
+
+bool Advection::_isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max)
+{
+    if (p.location[0] < min[0] || p.location[1] < min[1] || p.location[0] > max[0] || p.location[1] > max[1]) { return false; }
+    if (min.size() > 2 && (p.location[2] < min[2] || p.location[2] > max[2])) { return false; }
+    return true;
+}

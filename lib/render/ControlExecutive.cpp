@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <cfloat>
 
 #include <vapor/STLUtils.h>
 #include <vapor/ParamsMgr.h>
@@ -457,6 +458,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     // new data manager
     //
     if (_dataStatus->GetDataMgr(dataSetName)) {
+        _calcEngineMgr->Clean();
         _dataStatus->Close(dataSetName);
 
         vector<string> vizNames = _paramsMgr->GetVisualizerNames();
@@ -487,6 +489,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     for (int i = 0; i < appRenderParams.size(); i++) {
         int rc = appRenderParams[i]->Initialize();
         if (rc < 0) {
+            _calcEngineMgr->Clean();
             _dataStatus->Close(dataSetName);
             _paramsMgr->RemoveDataMgr(dataSetName);
             SetErrMsg("Failure to initialize application renderer \"%s\"", appRenderParams[i]->GetName().c_str());
@@ -498,6 +501,8 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     // Re-initialize the ControlExec to match the new state
     //
     rc = openDataHelper(true);
+
+    _setDefaultOrigin(dataSetName);
 
     if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
 
@@ -527,11 +532,7 @@ void ControlExec::CloseData(string dataSetName)
 
     _paramsMgr->RemoveDataMgr(dataSetName);
 
-    // Rebuild the calculation engine from params database after removing
-    // the data set from the params database.
-    //
-    _calcEngineMgr->ReinitFromState();
-
+    _calcEngineMgr->Clean();
     _dataStatus->Close(dataSetName);
 
     UndoRedoClear();
@@ -905,8 +906,6 @@ string ControlExec::GetFunctionStdout(string scriptType, string dataSetName, str
 std::vector<string> ControlExec::GetFunctionNames(string scriptType, string dataSetName) const { return (_calcEngineMgr->GetFunctionNames(scriptType, dataSetName)); }
 
 
-#include <cfloat>
-
 // Function moved from old NavigationEventRouter.cpp
 void ControlExec::_autoStretchExtents(string dataSetName)
 {
@@ -915,7 +914,7 @@ void ControlExec::_autoStretchExtents(string dataSetName)
     ParamsMgr *    paramsMgr = GetParamsMgr();
     vector<string> winNames = paramsMgr->GetVisualizerNames();
 
-    vector<double> minExt, maxExt;
+    CoordType minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
         ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
@@ -951,5 +950,35 @@ void ControlExec::_autoStretchExtents(string dataSetName)
         }
 
         transform->SetScales(scale);
+    }
+}
+
+
+void ControlExec::_setDefaultOrigin(string datasetName)
+{
+    DataStatus *ds = GetDataStatus();
+
+    ParamsMgr *    paramsMgr = GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    CoordType minExt, maxExt;
+
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+        Transform *         transform = vpParams->GetTransform(datasetName);
+        std::vector<double> origin = transform->GetOrigin();
+
+        // Skip if not default
+        bool skip = false;
+        for (int i = 0; i < 3; i++)
+            if (origin[i] != 0.f) skip = true;
+        if (skip) continue;
+
+        size_t ts = 0;
+        ds->GetActiveExtents(paramsMgr, winNames[i], datasetName, ts, minExt, maxExt);
+
+        for (int i = 0; i < minExt.size(); i++) origin[i] = (maxExt[i] + minExt[i]) / 2;
+
+        transform->SetOrigin(origin);
     }
 }

@@ -36,7 +36,7 @@ const string maxEdgesDimName = "maxEdges";
 const string maxEdges2DimName = "maxEdges2";
 const string vertexDegreeDimName = "vertexDegree";
 
-const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, nEdgesDimName, maxEdgesDimName, maxEdges2DimName, vertexDegreeDimName};
+const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, nEdgesDimName, vertexDegreeDimName};
 
 const vector<string> optionalVertDimNames = {nVertLevelsDimName};
 
@@ -242,6 +242,9 @@ DCMPAS::~DCMPAS()
 
 int DCMPAS::initialize(const vector<string> &files, const std::vector<string> &options)
 {
+    if (_ncdfc) delete _ncdfc;
+    _ncdfc = nullptr;
+
     // Use UDUnits for unit conversion
     //
     int rc = _udunits.Initialize();

@@ -66,8 +66,8 @@ size_t gcd(size_t n1, size_t n2)
 
 size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 
-int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, double mv,
-                  float *buffer)
+int copyVarHelper(DC &dc, VDCNetCDF &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice,
+                  double mv, float *buffer)
 {
     VAssert(buffer_dims.size() == src_hslice_dims.size());
     VAssert(buffer_dims.size() == dst_hslice_dims.size());
@@ -116,7 +116,7 @@ int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dim
     return (0);
 }
 
-int CopyVar2d3dMask(DC &dc, VDC &vdc, size_t ts, string varname, int lod)
+int CopyVar2d3dMask(DC &dc, VDCNetCDF &vdc, size_t ts, string varname, int lod)
 {
     // Only data variables can have masks
     //
@@ -193,7 +193,10 @@ int CopyVar2d3dMask(DC &dc, VDC &vdc, size_t ts, string varname, int lod)
     if (fdr < 0) return (fdr);
 
     int fdw = vdc.OpenVariableWrite(ts, maskvar, lod);
-    if (fdw < 0) return (fdw);
+    if (fdw < 0) {
+        dc.CloseVariable(fdr);
+        return (fdw);
+    }
 
     size_t bufsize = vproduct(buffer_dims);
     float *buffer = (float *)dataBuffer.Alloc(bufsize * sizeof(*buffer));
@@ -262,8 +265,19 @@ int main(int argc, char **argv)
     rc = dccf.Initialize(cffiles, vector<string>());
     if (rc < 0) { return (1); }
 
+    //
+    // Copy coordinate variables first, checking to ensure that the
+    // coordinate variable isn't also a data variable (a variable can
+    // be both data and coordinate). If a coord variable is also
+    // a data variable, skip it and handle below
+    //
     vector<string> varnames = dccf.GetCoordVarNames();
+    vector<string> dvarnames = dccf.GetDataVarNames();
     for (int i = 0; i < varnames.size(); i++) {
+        // Skip coordinate varibles that are also data variables
+        //
+        if (find(dvarnames.begin(), dvarnames.end(), varnames[i]) != dvarnames.end()) continue;
+
         int nts = dccf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
         VAssert(nts >= 0);
@@ -288,6 +302,8 @@ int main(int argc, char **argv)
 
     varnames = remove_vector(varnames, opt.xvars);
 
+    // Now copy data variables
+    //
     int estatus = 0;
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dccf.GetNumTimeSteps(varnames[i]);

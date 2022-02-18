@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
+#include <float.h>
 #include "vapor/VAssert.h"
 #include "vapor/utils.h"
 #include "vapor/FileUtils.h"
@@ -40,7 +41,7 @@ const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
 const std::string           BOVCollection::_defaultVar = "brickVar";
-const double                BOVCollection::_defaultTime = 0.;
+const double                BOVCollection::_defaultTime = FLT_MIN;
 const size_t                BOVCollection::_defaultByteOffset = 0;
 
 // Currently unused in ReadRegion() logic
@@ -61,6 +62,18 @@ const std::string BOVCollection::_intFormatString = "INT";
 const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
+namespace {
+size_t getFileSize(std::string filename)    // path to file
+{
+    FILE *p_file = NULL;
+    p_file = fopen(filename.c_str(), "rb");
+    fseek(p_file, 0, SEEK_END);
+    size_t size = ftell(p_file);
+    fclose(p_file);
+    return size;
+}
+}    // namespace
+
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _byteOffset(_defaultByteOffset), _divideBrick(_defaultDivBrick), _dataEndian(_defaultEndian),
   _centering(_defaultCentering), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
@@ -76,7 +89,9 @@ BOVCollection::BOVCollection()
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
-    _tmpGridSize = _defaultGridSize;
+    _tmpGridSize[0] = (int)_defaultGridSize[0];
+    _tmpGridSize[1] = (int)_defaultGridSize[1];
+    _tmpGridSize[2] = (int)_defaultGridSize[2];
     _brickOrigin = _defaultOrigin;
     _tmpBrickOrigin = _defaultOrigin;
     _brickSize = _defaultBrickSize;
@@ -100,6 +115,11 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
         header.open(paths[i]);
         if (header.is_open()) {
+            if (getFileSize(paths[i]) > 1000000) {
+                SetErrMsg(("BOV header file larger than 1MB.  This text file shouldn't need to be larger than a few KB." + paths[0]).c_str());
+                return -1;
+            }
+
             rc = _parseHeader(header);
             if (rc < 0) {
                 SetErrMsg(("Error parsing BOV file " + paths[0]).c_str());
@@ -123,8 +143,13 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFile == _defaultFile) { return _missingValueError(DATA_FILE_TOKEN); }
             if (_dataFormat == _defaultFormat) { return _missingValueError(FORMAT_TOKEN); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(GRID_SIZE_TOKEN); }
+            if (_time == _defaultTime) { return _missingValueError(TIME_TOKEN); }
 
-            _populateDataFileMap();
+            rc = _populateDataFileMap();
+            if (rc < 0) {
+                SetErrMsg("Problem indexing data files.");
+                return -1;
+            }
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
@@ -216,14 +241,17 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 int BOVCollection::_validateParsedValues()
 {
     // Validate grid dimensions
-    if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
+    if (_tmpGridSize[0] < 2 || _tmpGridSize[1] < 2 || _tmpGridSize[2] < 2)
         return _invalidDimensionError(GRID_SIZE_TOKEN);
-    else if (_tmpGridSize != _gridSize && _gridSizeAssigned == true)
+    else if ((_tmpGridSize[0] != _gridSize[0] || _tmpGridSize[1] != _gridSize[1] || _tmpGridSize[2] != _gridSize[2]) && _gridSizeAssigned == true)
         return _inconsistentValueError(GRID_SIZE_TOKEN);
     else {
-        _gridSize = _tmpGridSize;
+        _gridSize[0] = (size_t)_tmpGridSize[0];
+        _gridSize[1] = (size_t)_tmpGridSize[1];
+        _gridSize[2] = (size_t)_tmpGridSize[2];
         _gridSizeAssigned = true;
     }
+
 
     // Validate data format
     if (_tmpDataFormat == DC::INVALID)
@@ -247,6 +275,9 @@ int BOVCollection::_validateParsedValues()
     if (_tmpBrickSize != _brickSize && _brickSizeAssigned == true)
         return _inconsistentValueError(BRICK_SIZE_TOKEN);
     else {
+        for (size_t i = 0; i < _tmpBrickSize.size(); i++) {
+            if (_tmpBrickSize[i] < 0.) return _invalidValueError(BRICK_SIZE_TOKEN);
+        }
         _brickSize = _tmpBrickSize;
         _brickSizeAssigned = true;
     }
@@ -264,14 +295,21 @@ int BOVCollection::_validateParsedValues()
     return 0;
 }
 
-void BOVCollection::_populateDataFileMap()
+int BOVCollection::_populateDataFileMap()
 {
+    if (_dataFileMap[_variable].count(_time)) {
+        SetErrMsg("Duplicate time entries found in BOV files.  Each file must uniquely describe one variable, at one timestep.");
+        return -1;
+    }
+
     _variables.push_back(_variable);
 
     if (std::find(_times.begin(), _times.end(), _time) == _times.end()) _times.push_back(_time);
+
     std::sort(_times.begin(), _times.end());
 
     _dataFileMap[_variable][_time] = _dataFile;
+    return 0;
 }
 
 int BOVCollection::_invalidVarNameError() const
@@ -553,13 +591,13 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::FLOAT) {
                 float *castBuffer = (float *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::DOUBLE) {
                 double *castBuffer = (double *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             }
         }
     }

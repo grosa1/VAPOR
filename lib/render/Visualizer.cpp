@@ -123,29 +123,10 @@ int Visualizer::_getCurrentTimestep() const
 
 void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 {
-    string datasetName = r->GetMyDatasetName();
-    string myName = r->GetMyName();
-    string myType = r->GetMyType();
-
-    VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
-    vector<double>          scales, rotations, translations, origin;
-    Transform *             t = vpParams->GetTransform(datasetName);
+    string     datasetName = r->GetMyDatasetName();
+    Transform *t = getActiveViewpointParams()->GetTransform(datasetName);
     VAssert(t);
-    scales = t->GetScales();
-    rotations = t->GetRotations();
-    translations = t->GetTranslations();
-    origin = t->GetOrigin();
-
-    MatrixManager *mm = _glManager->matrixManager;
-
-    mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
-    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
-    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
-    mm->Scale(scales[0], scales[1], scales[2]);
-    mm->Translate(-origin[0], -origin[1], -origin[2]);
-
-    mm->Translate(translations[0], translations[1], translations[2]);
+    Renderer::ApplyDatasetTransform(_glManager, t);
 }
 
 int Visualizer::paintEvent(bool fast)
@@ -166,7 +147,9 @@ int Visualizer::paintEvent(bool fast)
     if (viewport[2] <= 0) return 0;
     if (viewport[3] <= 0) return 0;
 
+    assert(_framebuffer.IsComplete());
     _clearActiveFramebuffer(0.3, 0.3, 0.3);
+    GL_ERR_BREAK();
 
     int fbWidth = viewport[2];
     int fbHeight = viewport[3];
@@ -177,7 +160,11 @@ int Visualizer::paintEvent(bool fast)
         fbHeight = vp->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
     }
     _framebuffer.SetSize(fbWidth, fbHeight);
+
+    GLint destFbId;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &destFbId);
     _framebuffer.MakeRenderTarget();
+    GL_ERR_BREAK();
 
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
@@ -245,6 +232,7 @@ int Visualizer::paintEvent(bool fast)
     if (CheckGLError()) return -1;
 
     _framebuffer.UnBind();
+    glBindFramebuffer(GL_FRAMEBUFFER, destFbId);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     glBindVertexArray(_screenQuadVAO);
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Framebuffer");
@@ -530,7 +518,7 @@ int Visualizer::_captureImage(std::string path)
         VAssert(_dataStatus->GetDataMgrNames().size());
         string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
-        vector<double> dataMinExtents, dataMaxExtents;
+        CoordType dataMinExtents, dataMaxExtents;
         _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);
 
         double m[16];

@@ -24,6 +24,8 @@
 #include <vapor/Viewpoint.h>
 #include <vapor/Transform.h>
 
+#include <memory>
+
 namespace VAPoR {
 
 //! \class ViewpointParams
@@ -269,8 +271,8 @@ public:
     static const string CustomFramebufferHeightTag;
 
 private:
-    ParamsContainer *m_VPs;
-    ParamsContainer *_transforms;
+    ParamsContainer *m_VPs = nullptr;
+    ParamsContainer *_transforms = nullptr;
 
     static const string _viewPointsTag;
     static const string _transformsTag;
