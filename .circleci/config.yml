@@ -487,6 +487,7 @@ workflows:
             - build_centos7_installer
             - build_osx_installer
             - build_win10_installer
+
   #weekly:
   #    triggers:
   #      - schedule:
