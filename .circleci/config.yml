@@ -484,8 +484,8 @@ workflows:
       - build_centos7_installer
       - release_weekly_installers:
           requires:
-            - build_ubuntu18_installer
-            #- build_centos7_installer
+            #- build_ubuntu18_installer
+            - build_centos7_installer
             #- build_osx_installer
             #- build_win10_installer
 
