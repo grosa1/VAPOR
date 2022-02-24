@@ -412,6 +412,25 @@ int Visualizer::_configureLighting()
         // All the geometry will get a white specular color:
 
         lgl->LightDirectionfv(lightDir);
+        float tmp[4];
+        double pos[3];
+        const ViewpointParams * vpParams = getActiveViewpointParams();
+        double m[16];
+        vpParams->GetModelViewMatrix(m);
+        double posvec[3], upvec[3], dirvec[3];
+        vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
+        float fpos[3];
+        /*fpos[0] = posvec[0];
+        fpos[1] = posvec[1];
+        fpos[2] = posvec[2];*/
+        fpos[0] = dirvec[0];
+        fpos[1] = dirvec[1];
+        fpos[2] = dirvec[2];
+        //lgl->LightDirectionfv(fpos);
+        lgl->LightDirectionfv(lightDir);
+        std::cout << "lightDir " << lightDir[0] << " " << lightDir[1] << " " << lightDir[2] << " " << lightDir[3] << std::endl;
+        std::cout << "dirvec   " << dirvec[0] << " " << dirvec[1] << " " << dirvec[2] << std::endl;
+        std::cout << "posvec   " << posvec[0] << " " << posvec[1] << " " << posvec[2] << std::endl << std::endl;
     }
     if (CheckGLError()) return -1;
     return 0;
