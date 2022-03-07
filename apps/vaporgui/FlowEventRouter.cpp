@@ -5,6 +5,7 @@
 #include "PFlowIntegrationRegionSelector.h"
 #include "PMultiVarSelector.h"
 #include "PConstantColorWidget.h"
+#include "PSliderEditHLI.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -78,6 +79,11 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 new PFlowRakeRegionSelector1D(0),
                 new PFlowRakeRegionSelector1D(1),
                 new PFlowRakeRegionSelector1D(2),
+            }),
+            new PSection("Rake Center", {
+                (new PDoubleSliderEditHLI<FlowParams>("X", &FlowParams::GetXRakeCenter, &FlowParams::SetXRakeCenter))->EnableDynamicUpdate(),
+                (new PDoubleSliderEditHLI<FlowParams>("Y", &FlowParams::GetYRakeCenter, &FlowParams::SetYRakeCenter))->EnableDynamicUpdate(),
+                (new PDoubleSliderEditHLI<FlowParams>("Z", &FlowParams::GetZRakeCenter, &FlowParams::SetZRakeCenter))->EnableDynamicUpdate(),
             }),
         }),
         
