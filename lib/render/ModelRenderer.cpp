@@ -76,7 +76,9 @@ int ModelRenderer::_paintGL(bool fast)
     _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
     viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
 
-    lgl->Color3f(1, 1, 1);
+    std::vector<double> color = rp->GetValueDoubleVec(ModelParams::ColorTag, {1.,1.,1.});
+    //lgl->Color3f(1, 1, 1);
+    lgl->Color3f(color[0], color[1], color[2]);
     float lightDir[3] = {(float)cameraDir[0], (float)cameraDir[1], (float)cameraDir[2]};
     lgl->LightDirectionfv(lightDir);
     glDepthMask(GL_TRUE);

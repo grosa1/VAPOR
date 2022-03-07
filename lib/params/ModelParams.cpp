@@ -7,6 +7,7 @@ using namespace Wasp;
 using namespace VAPoR;
 
 const std::string ModelParams::FileTag = "FileTag";
+const std::string ModelParams::ColorTag = "ColorTag";
 
 //
 // Register class with object factory!!!
@@ -30,4 +31,7 @@ ModelParams::ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode
 ModelParams::~ModelParams() { SetDiagMsg("ModelParams::~ModelParams() this=%p", this); }
 
 // Set everything to default values
-void ModelParams::_init() { SetDiagMsg("ModelParams::_init()"); }
+void ModelParams::_init() { 
+    SetValueDoubleVec( ColorTag, "Model Color", {1.,1.,1.} );
+    SetDiagMsg("ModelParams::_init()"); 
+}
