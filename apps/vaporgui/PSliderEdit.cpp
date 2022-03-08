@@ -54,14 +54,14 @@ void PDoubleSliderEdit::valueChanged(double v) {
     if (v==.678) setParamsDouble(.789);
     if (v==.789) setParamsDouble(.890);
     if (v==.890) setParamsDouble(1.);*/
-    if (v==.123) valueChanged(.234); Update(_params,_paramsMgr,_dataMgr);
+    /*if (v==.123) valueChanged(.234); Update(_params,_paramsMgr,_dataMgr);
     if (v==.234) valueChanged(.345); Update(_params,_paramsMgr,_dataMgr);
     if (v==.345) valueChanged(.456); Update(_params,_paramsMgr,_dataMgr);
     if (v==.456) valueChanged(.567); Update(_params,_paramsMgr,_dataMgr);
     if (v==.567) valueChanged(.678); Update(_params,_paramsMgr,_dataMgr);
     if (v==.678) valueChanged(.789); Update(_params,_paramsMgr,_dataMgr);
     if (v==.789) valueChanged(.890); Update(_params,_paramsMgr,_dataMgr);
-    if (v==.890) valueChanged(.9); Update(_params,_paramsMgr,_dataMgr);
+    if (v==.890) valueChanged(.9); Update(_params,_paramsMgr,_dataMgr);*/
 }
 
 void PDoubleSliderEdit::valueChangedIntermediate(double v) { dynamicSetParamsDouble(v); }
