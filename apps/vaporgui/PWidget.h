@@ -24,9 +24,11 @@ template<class, typename> class PWidgetHLIBase;
 class PWidget : public UWidget {
     Q_OBJECT
 
+protected:
     VAPoR::ParamsBase *_params = nullptr;
     VAPoR::ParamsMgr * _paramsMgr = nullptr;
     VAPoR::DataMgr *   _dataMgr = nullptr;
+private:
     const std::string  _tag;
 
     bool        _showBasedOnParam = false;
