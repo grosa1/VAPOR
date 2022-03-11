@@ -550,6 +550,7 @@ void BarbRenderer::_setUpLightingAndColor()
         specColor[3] = 1.f;
         lgl->EnableLighting();
     }
+    lgl->DisableLighting();
     lgl->Color3fv(fcolor);
 }
 
