@@ -120,7 +120,7 @@ if (WIN32)
 	include_directories (${NUMPY_INCLUDE_DIR})
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 else ()
-	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
+	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
 
     # I'm not sure why we only have include files for python3.6, and not python3.6m.
     # 

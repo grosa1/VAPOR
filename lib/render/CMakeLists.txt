@@ -133,7 +133,7 @@ add_library (render SHARED ${SRC} ${HEADERS})
 if (WIN32)
     set (PYTHON_LIB_DIR python${PYTHONVERSION})
 else ()
-    set (PYTHON_LIB_DIR python${PYTHONVERSION}m)
+    set (PYTHON_LIB_DIR python${PYTHONVERSION})
 endif()
 
 target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} ${PYTHON_LIB_DIR} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})

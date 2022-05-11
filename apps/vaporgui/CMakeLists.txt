@@ -352,7 +352,7 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set (ASSIMP_LIB assimp)
-set (PYTHON_LIB python${PYTHONVERSION}m)
+set (PYTHON_LIB python${PYTHONVERSION})
 set (TIFF_LIB tiff)
 
 if (APPLE)

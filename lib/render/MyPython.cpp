@@ -167,7 +167,7 @@ int MyPython::Initialize()
 
     // Import matplotlib
     //
-    std::string importMPL = "try:\n"
+    /*std::string importMPL = "try:\n"
                             "	import matplotlib\n"
                             "except: \n"
                             "	print('Failed to import matplotlib', file=sys.stderr)\n"
@@ -176,7 +176,7 @@ int MyPython::Initialize()
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
         return (-1);
-    }
+    }*/
 
     // Add vapor modules to search path
     //
@@ -210,7 +210,7 @@ string MyPython::PyErr()
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyUnicode_AsUTF8(output);
+    const char * s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //
@@ -233,7 +233,7 @@ string MyPython::PyOut()
     if (!catcher) { return (""); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyUnicode_AsUTF8(output);
+    const char * s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //
