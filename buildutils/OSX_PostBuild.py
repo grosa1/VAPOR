@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 # On OSX, ld builds libraries that contain hard coded path to their dependencies.
 # After installation on a client machiene, these paths become invalid unless we 
 # modify them to reference @rpath.  This script adds @rpath!

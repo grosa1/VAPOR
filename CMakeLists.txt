@@ -284,7 +284,11 @@ endif (WIN32)
 if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib ${OSPRAYDIR}/lib/*.dylib) 
+		#file (GLOB_RECURSE INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib" "${THIRD_PARTY_LIB_DIR}/*.so") 
+		#file (GLOB INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib" "${THIRD_PARTY_LIB_DIR}/hdf/HDF_Group/HDF5/1.12.2/lib/plugin/*.so") 
+		file (GLOB INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib")
+        #message(STATUS "Files are ${INSTALL_LIBS}")
+        #message(STATUS "THIRD_PARTY_LIB_DIR ${THIRD_PARTY_LIB_DIR}")
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}
@@ -316,6 +320,13 @@ if (APPLE)
                 COMPONENT Dependencies
                 )
         endif ()
+        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/*.so")
+        message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
+		install (
+			FILES ${HDF5_PLUGINS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
 
     endif ()
 endif (APPLE)
