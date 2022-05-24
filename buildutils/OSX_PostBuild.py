@@ -23,6 +23,7 @@ import subprocess
 executable_dir   = "/Users/pearse/VAPOR/build/bin"
 vaporLibrary_dir = "/Users/pearse/VAPOR/build/lib"
 thirdParty_dir   = "/usr/local/VAPOR-Deps/2019-Aug/lib"
+h5plugin_dir   = "/usr/local/VAPOR-Deps/2019-Aug/lib/hdf/HDF_Group/HDF5/1.12.2/lib"
 
 changeDependencyCommand = "/usr/bin/install_name_tool -change "
 changeLibraryIDCommand  = "/usr/bin/install_name_tool -id "
@@ -78,4 +79,6 @@ def fixLibsInDir( directory, changeFileID ):
                 modifyPath( filename, changeFileID )
 
 # for changing rpath of our third-party libraries, such as libjpeg.dylib
-fixLibsInDir( thirdParty_dir, True )
+#fixLibsInDir( thirdParty_dir, True )
+fixLibsInDir( thirdParty_dir, False )
+#fixLibsInDir( h5plugin_dir, True )
