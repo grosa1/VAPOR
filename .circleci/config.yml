@@ -154,6 +154,15 @@ jobs:
       - checkout
 
       - run:
+          name: update 3rd party libraries
+          command: |
+            rm -rf /usr/local/VAPOR-Deps/2019-Aug
+            pip3 install gdown --upgrade
+            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
+            filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+ 
+      - run:
           name: make installer
           command: |
             cd /root/project/build
@@ -324,6 +333,15 @@ jobs:
       - checkout
 
       - run:
+          name: update 3rd party libraries
+          command: |
+            rm -rf /usr/local/VAPOR-Deps/2019-Aug
+            pip3 install gdown --upgrade
+            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
+            filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+ 
+      - run:
           name: make debug
           command: |
             cd /root/project/build
@@ -416,6 +434,15 @@ jobs:
       steps:
         - checkout
   
+      - run:
+          name: update 3rd party libraries
+          command: |
+            rm -rf /usr/local/VAPOR-Deps/2019-Aug
+            pip3 install gdown --upgrade
+            gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
+            filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+ 
         - run:
             name: make debug
             command: |
@@ -589,7 +616,7 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       - build_osx_installer
-      #- build_ubuntu18_installer
+      - build_ubuntu18_installer
       - build_centos7_installer
       #- release_weekly_installers:
       #    requires:
