@@ -162,7 +162,7 @@ jobs:
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
             filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
           name: make installer
@@ -341,7 +341,7 @@ jobs:
             pip install gdown --upgrade
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
             filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
           name: make debug
