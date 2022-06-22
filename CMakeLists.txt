@@ -262,6 +262,11 @@ if (WIN32)
 			${QTDIR}/plugins/platforms/qwindows.dll
 			DESTINATION platforms
 		)
+		install (
+			DIRECTORY ${THIRD_PARTY_DIR}/lib/plugin
+			DESTINATION ${INSTALL_BIN_DIR}
+			COMPONENT Dependencies
+			)
 	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH OFF)
