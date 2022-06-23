@@ -25,6 +25,7 @@
 #include <qfont.h>
 #include <QMessageBox>
 #include <QFontDatabase>
+#include <H5PLpublic.h>
 #include "BannerGUI.h"
 #include <vapor/CMakeConfig.h>
 #include <vapor/ResourcePath.h>
@@ -183,8 +184,8 @@ int           main(int argc, char **argv)
     // StartupParams* sParams = new StartupParams(0);
 
     string fontFile = GetSharePath("fonts/arimo.ttf");
-    string plugins = GetSharePath("plugin");
-    std::cout << plugins << std::endl;
+    string plugins = GetResourcePath("lib");
+    H5PLreplace(plugins.c_str(), 0);
 
     QFontDatabase fdb;
     fdb.addApplicationFont(QString::fromStdString(fontFile));
