@@ -284,11 +284,7 @@ endif (WIN32)
 if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		#file (GLOB_RECURSE INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib" "${THIRD_PARTY_LIB_DIR}/*.so") 
-		#file (GLOB INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib" "${THIRD_PARTY_LIB_DIR}/hdf/HDF_Group/HDF5/1.12.2/lib/plugin/*.so") 
 		file (GLOB INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/*.dylib" "${OSPRAYDIR}/lib/*.dylib")
-        #message(STATUS "Files are ${INSTALL_LIBS}")
-        #message(STATUS "THIRD_PARTY_LIB_DIR ${THIRD_PARTY_LIB_DIR}")
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}

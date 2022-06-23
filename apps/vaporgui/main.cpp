@@ -183,6 +183,8 @@ int           main(int argc, char **argv)
     // StartupParams* sParams = new StartupParams(0);
 
     string fontFile = GetSharePath("fonts/arimo.ttf");
+    string plugins = GetSharePath("plugin");
+    std::cout << plugins << std::endl;
 
     QFontDatabase fdb;
     fdb.addApplicationFont(QString::fromStdString(fontFile));
