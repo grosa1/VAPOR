@@ -196,7 +196,7 @@ jobs:
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
+            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
             filename="/root/project/2019-Aug-CentOS.tar.xz"
             bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
@@ -442,7 +442,7 @@ jobs:
             command: |
               rm -rf /usr/local/VAPOR-Deps/2019-Aug
               pip3 install gdown --upgrade
-              gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
+              gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
               filename="/root/project/2019-Aug-CentOS.tar.xz"
               bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
@@ -620,7 +620,7 @@ workflows:
       - build_win10_installer
       - build_osx_installer
       - build_ubuntu18_installer
-      #- build_centos7_installer
+      - build_centos7_installer
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
