@@ -396,7 +396,7 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/HDF_Group/HDF5/1.12.2/lib/plugin/*.dll")
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
 		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
