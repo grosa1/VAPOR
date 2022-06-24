@@ -242,7 +242,6 @@ if (WIN32)
 	if (GENERATE_FULL_INSTALLER)
 		set (LIB_DIR ${THIRD_PARTY_DIR}/lib)
 		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll ${OSPRAYDIR}/bin/*.dll)
-		file (GLOB HDF5_PLUGINS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll ${OSPRAYDIR}/bin/*.dll)
 
 		install (
 			FILES ${WIN_INSTALL_DLLS}
@@ -263,12 +262,11 @@ if (WIN32)
 			${QTDIR}/plugins/platforms/qwindows.dll
 			DESTINATION platforms
 		)
-        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/plugin/*.dll")
 		install (
-			FILES ${HDF5_PLUGINS}
+			DIRECTORY ${THIRD_PARTY_DIR}/lib/plugin
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
-			)
+		)
 	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH OFF)
@@ -398,7 +396,7 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/*.so")
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/plugin/*.dll")
 		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
