@@ -617,7 +617,7 @@ workflows:
       #- build_centos7
       #- foo
       #- test_clang_format
-      #- build_win10_installer
+      - build_win10_installer
       - build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
