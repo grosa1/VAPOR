@@ -160,7 +160,7 @@ jobs:
             apt update
             apt install -y python3-pip
             pip3 install gdown
-            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
@@ -340,7 +340,7 @@ jobs:
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
@@ -619,7 +619,7 @@ workflows:
       #- test_clang_format
       - build_win10_installer
       - build_osx_installer
-      #- build_ubuntu18_installer
+      - build_ubuntu18_installer
       #- build_centos7_installer
       #- release_weekly_installers:
       #    requires:
