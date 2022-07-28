@@ -394,31 +394,24 @@ public:
     void           SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 
     //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
-    //! \retval bool - Indicates whether the renderer can be arbitrarily oriented.
     virtual bool GetOrientable() const;
 
     //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - Rotation values on the X, Y, and Z axes.
     vector<double> GetSlicePlaneRotation() const;
 
     //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - The coordinates of a 2D plane's point of origin.
     vector<double> GetSlicePlaneOrigin() const;
 
     //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - The coordinates of a 2D plane's normal vector.
     vector<double> GetSlicePlaneNormal() const;
 
     //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval double - The coordinates of a 2D plane's point of origin on the X axis.
     double GetXSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval double - The coordinates of a 2D plane's point of origin on the Y axis.
     double GetYSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval double - The coordinates of a 2D plane's point of origin on the Z axis.
     double GetZSlicePlaneOrigin() const;
 
     //! Set the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
