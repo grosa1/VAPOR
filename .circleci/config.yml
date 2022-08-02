@@ -160,6 +160,7 @@ jobs:
             apt update
             apt install -y python3-pip
             pip3 install --upgrade pip
+            pip3 install scikit-build command
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
             filename="/root/project/2019-Aug-Ubuntu-2022.tar.xz"
@@ -335,6 +336,7 @@ jobs:
             apt-get install -y python3
             apt install -y python3-pip
             pip3 install --upgrade pip
+            pip3 install scikit-build command
       - checkout
 
       - run:
