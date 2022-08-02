@@ -159,6 +159,7 @@ jobs:
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             apt update
             apt install -y python3-pip
+            pip3 install --upgrade pip
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
             filename="/root/project/2019-Aug-Ubuntu-2022.tar.xz"
@@ -333,6 +334,7 @@ jobs:
             apt-get update
             apt-get install -y python3
             apt install -y python3-pip
+            pip3 install --upgrade pip
       - checkout
 
       - run:
@@ -613,7 +615,7 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      #- build_ubuntu18
+      - build_ubuntu18
       #- build_centos7
       #- foo
       #- test_clang_format
