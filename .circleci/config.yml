@@ -213,14 +213,13 @@ jobs:
       - run:
           name: install python
           command: |
-            brew install -y python3
-            brew install -y python3-pip
+            brew install python3
             pip3 install --upgrade pip
             pip3 install scikit-build command
       - run:
           name: install miniconda
           command: |
-            brew install -y wget
+            brew install wget
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
             bash ~/miniconda.sh -b -p ~/miniconda 
 
@@ -228,7 +227,7 @@ jobs:
           name: conda build .
           command: |
             sudo port select --set clang mp-clang-13
-            brew -y install doxygen
+            brew install doxygen
             #rm -rf /root/project/build/*
             #rm -f /root/project/site.local
             #cd /root/project/build
