@@ -750,8 +750,9 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      #- build_ubuntu18
+      #- build_centos7
+      - conda_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
