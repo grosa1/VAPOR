@@ -231,7 +231,7 @@ jobs:
             #rm -rf /root/project/build/*
             #rm -f /root/project/site.local
             #cd /root/project/build
-            cd /root/project/conda
+            cd /Users/distiller/project/conda
             export PYTHONPATH=/root/miniconda/lib/python3.9
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
