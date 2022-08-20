@@ -226,7 +226,7 @@ jobs:
       - run:
           name: conda build .
           command: |
-            sudo port select --set clang mp-clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
             brew install doxygen
             #rm -rf /root/project/build/*
             #rm -f /root/project/site.local
