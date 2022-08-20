@@ -233,9 +233,9 @@ jobs:
             #cd /root/project/build
             cd /Users/distiller/project/conda
             export PYTHONPATH=/root/miniconda/lib/python3.9
-            /root/miniconda/bin/conda install -y conda-build
-            /root/miniconda/bin/conda config --add channels conda-forge
-            /root/miniconda/bin/conda build .
+            /Users/distiller/miniconda/bin/conda install -y conda-build
+            /Users/distiller/miniconda/bin/conda config --add channels conda-forge
+            /Users/distiller/miniconda/bin/conda build .
             mv *.tar.bz2 /tmp/workspace/installers
           no_output_timeout: 30m
 
