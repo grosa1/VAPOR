@@ -230,7 +230,7 @@ jobs:
             #cd /root/project/build
             cd /Users/distiller/project/conda
             export PYTHONPATH=/root/miniconda/lib/python3.9
-            /Users/distiller/miniconda/bin/conda install -y conda-build anaconda
+            /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
             /Users/distiller/miniconda/bin/conda build .
             mv *.tar.bz2 /tmp/workspace/installers
