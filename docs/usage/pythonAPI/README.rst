@@ -1,8 +1,8 @@
-.. _usage:
+.. _pythonAPI:
 
-=============
-Using Vapor 3
-=============
+==========
+Python API
+==========
 
 Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualizes your data in different ways based on your specifications.
 
@@ -18,12 +18,3 @@ If any feature in Vapor is not sufficienty self describing in the application, t
 
 .. toctree::
     :maxdepth: 1 
-
-    usage/renderers.rst
-    usage/rendererControls.rst
-    usage/pythonAPI/index.rst
-    usage/creatingNewVariablesWithPython.rst
-    usage/navigationSettings.rst
-    usage/globalSettings.rst
-    usage/ancillaryTools.rst
-

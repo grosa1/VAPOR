@@ -4,7 +4,8 @@
 # You can set these variables from the command line.
 SPHINXOPTS    = -b html
 #SPHINXBUILD   = /usr/local/bin/sphinx-build
-SPHINXBUILD   = sphinx-build
+#SPHINXBUILD   = sphinx-build
+SPHINXBUILD    = /Users/pearse/miniconda3/bin/sphinx-build
 SOURCEDIR     = .
 BUILDDIR     = .
 

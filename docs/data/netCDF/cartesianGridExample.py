@@ -2,7 +2,7 @@
 
 """
 cartesianGridExample.py
-=====================
+=======================
 This script applies the CF Conventions to a basic NetCDF file so Vapor can read it.
 It performs the the following:
    - Creates "Coordinate Variables" for the spatial and time dimensions
