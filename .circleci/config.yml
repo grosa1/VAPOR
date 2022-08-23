@@ -341,23 +341,23 @@ jobs:
     resource_class: large
 
     steps:
-      - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-            filename="/root/project/2019-Aug-CentOS.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+      #- run:
+      #    name: update 3rd party libraries
+      #    command: |
+      #      rm -rf /usr/local/VAPOR-Deps/2019-Aug
+      #      pip3 install gdown --upgrade
+      #      gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
+      #      filename="/root/project/2019-Aug-CentOS.tar.xz"
+      #      bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
 
-      - run:
-          name: install python
-          command: |
-            yum -y update || true
-            yum install -y python3
-            yum install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
+      #- run:
+      #    name: install python
+      #    command: |
+      #      yum -y update || true
+      #      yum install -y python3
+      #      yum install -y python3-pip
+      #      pip3 install --upgrade pip
+      #      pip3 install scikit-build command
 
       - run:
           name: install miniconda
@@ -371,19 +371,21 @@ jobs:
       - run:
           name: conda build .
           command: |
-            yum -y install doxygen
+            #yum -y install doxygen
             rm -rf /root/project/build/*
             rm -f /root/project/site.local
             cd /root/project/build
             cd /root/project/conda
-            export PYTHONPATH=/root/miniconda/lib/python3.9
+            #export PYTHONPATH=/root/miniconda/lib/python3.9
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
+            mkdir tarballDir
+            mv *.tar.bz2 tarBallDir
           no_output_timeout: 20m
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64
+          path: /root/miniconda/conda-bld/linux-64/tarBallDir
 
   python_api_ubuntu:
     docker:
@@ -401,15 +403,15 @@ jobs:
             pip3 install --upgrade pip
             pip3 install scikit-build command
 
-      - run:
-          name: update cmake
-          command: |
-            apt remove -y --purge --auto-remove cmake
-            apt install -y libssl-dev
-            apt install -y build-essential git
-            git clone https://github.com/Kitware/CMake/
-            cd CMake
-            ./bootstrap && make && make install
+      #- run:
+      #    name: update cmake
+      #    command: |
+      #      apt remove -y --purge --auto-remove cmake
+      #      apt install -y libssl-dev
+      #      apt install -y build-essential git
+      #      git clone https://github.com/Kitware/CMake/
+      #      cd CMake
+      #      ./bootstrap && make && make install
 
       - run:
           name: install miniconda
@@ -740,9 +742,10 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      #- build_ubuntu18
+      #- build_centos7
       - python_api_centos
+      - python_api_ubuntu
       #- foo
       #- test_clang_format
       #- build_win10_installer
