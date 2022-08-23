@@ -380,8 +380,8 @@ jobs:
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
-            mkdir tarballDir
-            mv *.tar.bz2 tarBallDir
+            mkdir /root/miniconda/conda-bld/linux-64/tarballDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
           no_output_timeout: 20m
  
       - store_artifacts:
@@ -432,7 +432,7 @@ jobs:
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
-            nohup /root/miniconda/bin/conda build . &
+            /root/miniconda/bin/conda build .
           no_output_timeout: 30m
  
       - store_artifacts:
