@@ -336,8 +336,7 @@ jobs:
 
   python_api_centos:
     docker:
-      #- image: sgpearse/vapor3-centos7:latest
-      - image: conda/miniconda3
+      - image: sgpearse/vapor3-centos7:latest
 
     resource_class: large
 
@@ -391,7 +390,8 @@ jobs:
 
   python_api_ubuntu:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      #- image: sgpearse/vapor3-ubuntu18:latest
+      - image: conda/miniconda3
 
     resource_class: large
 
