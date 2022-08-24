@@ -336,7 +336,8 @@ jobs:
 
   python_api_centos:
     docker:
-      - image: sgpearse/vapor3-centos7:latest
+      #- image: sgpearse/vapor3-centos7:latest
+      - image: conda/miniconda3
 
     resource_class: large
 
@@ -381,7 +382,8 @@ jobs:
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
+            #mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
           no_output_timeout: 20m
  
       - store_artifacts:
