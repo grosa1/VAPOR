@@ -434,7 +434,7 @@ jobs:
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
           no_output_timeout: 30m
  
       - store_artifacts:
