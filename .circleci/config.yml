@@ -358,6 +358,7 @@ jobs:
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
+            /root/miniconda/bin/conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
             mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
  
@@ -407,6 +408,7 @@ jobs:
             cd /Users/distiller/project/conda
             /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
+            /Users/distiller/miniconda/bin/conda build .
             /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
             mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
