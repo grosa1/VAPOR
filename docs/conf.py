@@ -6,88 +6,6 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-def fetchPythonAPIExamples():
-    # Fetch python API examples
-    subprocess.call("git checkout origin/main -- ../apps/pythonapi/examples", shell=True)
-    subprocess.call("mv ../apps/pythonapi/examples pythonAPIReference", shell=True)
-
-    # Get all .py files in /examples
-    files = os.listdir("pythonAPIReference/examples")
-    files = [ fi for fi in files if fi.endswith(".py") ]
-
-    # Generate python api examples in pythonAPIReference/examples.rst
-    exampleFile = open("pythonAPIReference/examples.rst", "w+")
-    exampleFile.writelines(["Examples\n________\n\n"])
-    exampleFile.writelines(["Once you've installed VAPOR's Python API, you can find the examples below in the following directory:\n\n"])
-    exampleFile.writelines([".. code-block:: console\n\n"])
-    exampleFile.writelines(["    $CONDA_PREFIX/lib/python3.9/site-packages/vapor/examples\n\n"])
-    exampleFile.writelines([".. toctree::\n\n"])
-    for fi in files:
-        rstFileName = "examples/" + fi[0:-3] + ".rst"
-        exampleFile.writelines(["   " + rstFileName + "\n"])
-        rstFile = open("pythonAPIReference/" + rstFileName, "w+")
-        rstFile.writelines([fi + "\n"])
-        rstFile.writelines(["-" * len(fi) + "\n\n"])
-        rstFile.writelines([".. literalinclude:: " + fi + "\n"])
-        rstFile.close()
-    exampleFile.close()
-
-#def generatePythonAPIClassReference():
-#    import vapor
-#    classReferenceFileName = "pythonAPIReference/classReference.rst"
-#    classReferenceFile = open(classReferenceFileName, "w")
-#    classReferenceFile.writelines([".. _classReference:\n\n"])
-#    classReferenceFile.writelines(["Class Reference\n"])
-#    classReferenceFile.writelines(["_______________\n\n"])
-#    classReferenceFile.writelines([".. toctree::\n"])
-#    classReferenceFile.writelines(["   :maxdepth: 1\n\n"])
-#
-#    classReferenceFiles = "pythonAPIReference/classReferenceFiles"
-#    if (os.path.isdir(classReferenceFiles)):
-#        import shutil
-#        shutil.rmtree(classReferenceFiles)
-#    os.mkdir(classReferenceFiles)
-#
-#    package=vapor
-#    for importer, modName, ispkg in pkgutil.walk_packages(path=package.__path__,
-#                                                          prefix=package.__name__+'.',
-#                                                          onerror=lambda x: None):
-#        mod = __import__(modName, fromlist=["vapor"])
-#        classReferenceFile.writelines(["   classReferenceFiles//" + modName + ".rst\n"])
-#
-#        modDir = classReferenceFiles + "//" + modName + "//"
-#        os.mkdir(modDir)
-#
-#        modFileName = modDir[0:-2] + ".rst"
-#        modFile = open(modFileName, "w")
-#        modFile.writelines([".. _" + modName + ":\n\n"])
-#        modFile.writelines([modName + "\n"])
-#        modFile.writelines([str("-" * len(modName)) + "\n\n"])
-#        modFile.writelines([".. toctree::\n"])
-#        modFile.writelines(["   :maxdepth: 1\n\n"])
-#
-#        classes = dict([(name, cls) for name, cls in mod.__dict__.items() if isinstance(cls, type)])
-#
-#        for myClass in classes:
-#            className = modName + "." + myClass
-#            out = sys.stdout
-#            classFileName = modDir + className + ".rst"
-#
-#            # Add this class's .rst file to moduleFile toctree
-#            modFile.writelines(["   " + modName + "//" + className + ".rst\n"])
-#
-#            # write file through stdout, since help() outputs through stdout
-#            sys.stdout = open(classFileName, "w")
-#            #print(":orphan:")
-#            print(".. _" + className + ":")
-#            print("\n")
-#            print(className)
-#            print("-" * len(className))
-#            print("\n")
-#            help(className)
-#            sys.stdout.close()
-#            sys.stdout = out
-
 import os
 import sys
 import sphinx_rtd_theme
@@ -103,6 +21,7 @@ import pkgutil
 
 # Add vapor_utils to path and vapor_wrf modules for python engine documentation
 sys.path.insert(0, os.path.abspath('vaporApplicationReference/otherTools'))
+sys.path.insert(0, os.path.abspath('/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonapi2/lib/python3.9/site-packages/vapor'))
 
 # -- Project information -----------------------------------------------------
 
@@ -114,7 +33,6 @@ author = ''
 version = ''
 # The full version, including alpha/beta/rc tags
 release = '3.8.0'
-
 
 #breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
 #breathe_default_project = "myproject"
@@ -264,31 +182,63 @@ from sphinx_gallery.sorting import ExampleTitleSortKey
 sphinx_gallery_conf = {
     'examples_dirs': ['dataFormatRequirements/netCDF', 'vaporApplicationReference/imageRenderer'],  # path to your example scripts
     'gallery_dirs': ['dataFormatRequirements/netCDF/examples', 'vaporApplicationReference/imageRenderer'],  # path to where to save gallery generated output
-    #'examples_dirs': ['data/netCDF', 'vaporApplicationReference/imageRenderer', 'pythonAPIReference/examples'],  # path to your example scripts
-    #'gallery_dirs': ['data/netCDF/examples', 'vaporApplicationReference/imageRenderer', 'pythonAPIReference/examples'],  # path to where to save gallery generated output
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
 
-#fetchPythonAPIExamples()
-#generatePythonAPIClassReference()
+#
+# Create Python API Reference materials
+#
 
-'''print("*******************")
-print("*******************")
-print("*******************")
-print("*******************")
-print("*******************")
-subprocess.call("pwd", shell=True)
-subprocess.call("which python", shell=True)
-subprocess.call("python --version", shell=True)
-subprocess.call("echo prefix: ${CONDA_PREFIX}", shell=True)
-subprocess.call("ls ${CONDA_PREFIX}/include", shell=True)
-subprocess.call("ls /include", shell=True)'''
+userModules = [
+    'animation',
+    'annotations',
+    'camera',
+    'dataset',
+    'renderer',
+    'session',
+    'transferfunction',
+    'transform'
+]
 
-'''test = r'CONDA_PREFIX=/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp python -c "exec(\"import vapor\")"'
-print(test)
-subprocess.call(test, shell=True)'''
+devModules = [
+    'cmake',
+    'common',
+    'config',
+    'cppyyDoxygenWrapper',
+    'link',
+    'params',
+    'smartwrapper'
+]
 
-'''#subprocess.call("python -c \"exec\("import vapor\n\"\)\"", shell=True)
-subprocess.call("/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp/bin/python makePythonClassReference.py", shell=True)
-subprocess.call("/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp/bin/python docs/makePythonClassReference.py", shell=True)'''
+condaPrefix = os.environ.get('CONDA_PREFIX')
+pwd = os.path.dirname(os.path.realpath(__file__))
+
+devModulesCommand = "sphinx-apidoc -f --separate --output-dir " + pwd + "/pythonAPIReference/devModules " + condaPrefix + "/lib/python3.9/site-packages/vapor "
+for module in userModules:
+    devModulesCommand += condaPrefix + "/lib/python3.9/site-packages/vapor/" + module + ".py "
+print("devModulesCommand " + devModulesCommand)
+ret = subprocess.run(devModulesCommand, capture_output=True, shell=True)
+
+# Replace sphinx-apidoc default header name
+with open(pwd + "/pythonAPIReference/devModules/vapor.rst", 'r+') as f:
+    content = f.read().splitlines(True)
+    content[0] = "Developer Modules\n"
+    content[1] = "=================\n"
+with open(pwd + "/pythonAPIReference/devModules/vapor.rst", 'w') as f:
+    f.writelines(content)
+
+userModulesCommand = "sphinx-apidoc -f --separate --output-dir " + pwd + "/pythonAPIReference/userModules " + condaPrefix + "/lib/python3.9/site-packages/vapor "
+for module in devModules:
+    userModulesCommand += condaPrefix + "/lib/python3.9/site-packages/vapor/" + module + ".py "
+print("userModulesCommand " + userModulesCommand)
+ret = subprocess.run(userModulesCommand, capture_output=True, shell=True)
+print("userModulesResult " + str(ret.stdout.decode()))
+
+# Replace sphinx-apidoc default header name
+with open(pwd + "/pythonAPIReference/userModules/vapor.rst", 'r+') as f:
+    content = f.read().splitlines(True)
+    content[0] = "User Modules\n"
+    content[1] = "============\n"
+with open(pwd + "/pythonAPIReference/userModules/vapor.rst", 'w') as f:
+    f.writelines(content)
