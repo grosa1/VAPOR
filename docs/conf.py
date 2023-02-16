@@ -211,8 +211,8 @@ devModules = [
     'smartwrapper'
 ]
 
-condaPrefix = os.environ.get('CONDA_PREFIX')
-pwd = os.path.dirname(os.path.realpath(__file__))
+condaPrefix = str(os.environ.get('CONDA_PREFIX'))
+pwd = str(os.path.dirname(os.path.realpath(__file__)))
 
 devModulesCommand = "sphinx-apidoc -f --separate --output-dir " + pwd + "/pythonAPIReference/devModules " + condaPrefix + "/lib/python3.9/site-packages/vapor "
 for module in userModules:
