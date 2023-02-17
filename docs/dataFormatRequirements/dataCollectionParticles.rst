@@ -5,6 +5,8 @@ Data Collection Particles (DCP)
 
 Data Collection Particles is a simple data format built upon NetCDF for importing particle data into VAPoR.
 
+To generate a sample dataset of DCP files, run the python script that comes with Vapor, located in <installationDir>/share/examples/generateExampleDCP.py
+
 Dimensions
 __________
 
