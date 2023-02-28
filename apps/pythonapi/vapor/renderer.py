@@ -61,6 +61,9 @@ class Renderer(ParamsWrapper, wrap=RenderParams):
     SetCompressionLevel
     GetCompressionLevel
     """)
+    _tags = ParamsTagWrapperList("""
+    ConstantOpacityTag
+    """)
     VaporName = None
 
     def __init__(self, renderParams:link.VAPoR.RenderParams, id:str):

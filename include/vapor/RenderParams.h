@@ -493,7 +493,7 @@ public:
     static const string _xFieldVariableNameTag;
     static const string _yFieldVariableNameTag;
     static const string _zFieldVariableNameTag;
-    static const string _constantOpacityTag;
+    static const string ConstantOpacityTag;
     static const string CustomHistogramDataTag;
     static const string CustomHistogramRangeTag;
     static const string LightingEnabledTag;

@@ -46,7 +46,7 @@ const string RenderParams::_distribVariableNamesTag = "DistributionVariableNames
 const string RenderParams::_variableNameTag = "VariableName";
 const string RenderParams::_useSingleColorTag = "UseSingleColor";
 const string RenderParams::_constantColorTag = "ConstantColor";
-const string RenderParams::_constantOpacityTag = "ConstantOpacity";
+const string RenderParams::ConstantOpacityTag = "ConstantOpacity";
 const string RenderParams::CustomHistogramDataTag = "CustomHistogramData";
 const string RenderParams::CustomHistogramRangeTag = "CustomHistogramRange";
 const string RenderParams::_CompressionLevelTag = "CompressionLevel";
@@ -640,13 +640,13 @@ void RenderParams::SetConstantOpacity(float o)
     if (o < 0.0) o = 0.0;
     if (o > 1.0) o = 1.0;
 
-    SetValueDouble(_constantOpacityTag, "Specify constant opacity", o);
+    SetValueDouble(ConstantOpacityTag, "Specify constant opacity", o);
 }
 
 float RenderParams::GetConstantOpacity() const
 {
     vector<double> defaultv(1, 1.0);
-    vector<double> vec = GetValueDoubleVec(_constantOpacityTag, defaultv);
+    vector<double> vec = GetValueDoubleVec(ConstantOpacityTag, defaultv);
 
     float o = 1.0;
     if (vec.size()) o = vec[0];
