@@ -11,8 +11,12 @@ void SetHDF5PluginPath() {
         rc=_putenv(plugins.c_str());
     #else
         rc = setenv("HDF5_PLUGIN_PATH", Wasp::GetSharePath("plugins").c_str(), 1);
+        std::cout << "Value: " << getenv("HDF5_PLUGIN_PATH") << std::endl;
+
     #endif
 
     if (rc != 0) Wasp::MyBase::SetErrMsg("Unable to set environtment variable s", plugins.c_str());
+
+    std::cout << "plugin path " << plugins.c_str() << std::endl;
 }
 };    // namespace VAPoR

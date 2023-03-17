@@ -127,11 +127,17 @@ if (CONDA_BUILD)
         set (MAP_IMAGES_PATH $ENV{MAP_IMAGES_PATH})
     endif()
 else()
+    message("THIRD_PARTY_DIR = ${THIRD_PARTY_DIR}")
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR})
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/freetype2)
     link_directories (${THIRD_PARTY_LIB_DIR})
     link_directories (${PYTHONPATH})
+
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
+    #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.14.0/lib)
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.13.3/lib)
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
@@ -189,7 +195,8 @@ function(FIND_BUNDLED_PYTHON)
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
-    	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
+        #set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
+    	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
     endif()
 
     set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
@@ -439,6 +446,7 @@ if (APPLE)
                 )
         endif ()
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        message (STATUS "plugins ${HDF5_PLUGINS}")
 		install (
 			FILES ${HDF5_PLUGINS}
 			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
@@ -509,7 +517,7 @@ if (UNIX AND NOT APPLE)
                             OUTPUT_VARIABLE LSB_RELEASE
                             OUTPUT_STRIP_TRAILING_WHITESPACE
                         )
-			if(${LSB_RELEASE} MATCHES "^22.")
+			if(${LSB_RELEASE} MATCHES "^2[02].")
 		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
 		            install (
 		        	FILES ${XCB_FILES}
@@ -542,7 +550,9 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.14.0/lib/plugin/*.so")
+        file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
+        #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.13.3/lib/plugin/*.so")
 			install (
 				FILES ${HDF5_PLUGINS}
 				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
