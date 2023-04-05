@@ -99,47 +99,48 @@ elif [ $OS == "CentOS" ]; then
 fi
 
 libpng() {
+    cd $baseDir
     local library='libpng-1.6.39'
     tar xvf $baseDir/$library.tar.xz 
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
-    cd $baseDir
 }
 
 assimp() {
+    cd $baseDir
     local library='assimp-5.2.5'
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -Wno-error=deprecated-declarations" -Wno-error=deprecated-declarations ..
     make -j4 && make install
-    cd $baseDir
 }
 
 zlib() {
+    cd $baseDir
     local library='zlib-1.2.13'
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
-    cd $baseDir
 }
 
 #Note: after configuration, need to make sure both zlib and szlib are enabled!!
 # How are we supposed do do that?  Configure does not indicate yes or no...
 szip() {
+    cd $baseDir
     local library='szip-2.1.1'
     tar xvf $baseDir/$library.tar.gz
     cd $baseDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 #hdfVersion='1.14.0'
 #hdfVersion='1.13.3'
 hdfVersion='1.12.2'
 hdf5() {
+    cd $baseDir
     if [ $OS == "Ubuntu" ] || [ $OS == "CentOS" ]; then
         #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
         tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
@@ -153,11 +154,10 @@ hdf5() {
     fi
 
     ln -s $installDir/HDF_Group/HDF5/$hdfVersion/lib/plugin/ $installDir/share/plugins
-    
-    cd $baseDir
 }
 
 netcdf() {
+    cd $baseDir
     local library='netcdf-c-4.9.1'
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
@@ -170,45 +170,45 @@ netcdf() {
     -DCMAKE_BUILD_TYPE=Release ..
 
     make && make install
-    cd $baseDir
 }
 
 expat() {
+    cd $baseDir
     local library='expat-2.5.0'
     tar xvf $baseDir/$library.tar.xz 
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
-    cd $baseDir
 }
 
 udunits() {
+    cd $baseDir
     local library='udunits-2.2.28'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
     LDFLAGS=-L$installDir/lib/ CPPFLAGS=-I$installDir/include/ CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 freetype() {
+    cd $baseDir
     local library='freetype-2.13.0'
     tar xvf $baseDir/$library.tar.xz
     cd $baseDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 #CC=clang CXX=clang++ ./configure --prefix=/usr/local/VAPOR-Deps/2019-Aug
 jpeg() {
+    cd $baseDir
     tar xvf $baseDir/jpegsrc.v9e.tar.gz
     cd $baseDir/jpeg-9e
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 tiff() {
+    cd $baseDir
     local library='libtiff-v4.5.0'
     tar xvf $baseDir/$library.tar.gz
     cd $baseDir/$library
@@ -223,11 +223,10 @@ tiff() {
     autoconf
     LDFLAGS=-L$installDir/lib CPPFLAGS=-I$installDir/include CC=$CC CXX=$CXX ./configure --prefix=$installDir --disable-dap
     make -j4 && make install
-
-    cd $baseDir
 }
 
 tiffCmake() { # Does not work
+    cd $baseDir
     local library='libtiff-v4.5.0'
     #local library='libtiff-v4.4.0'
     tar xvf $baseDir/$library.tar.gz
@@ -250,7 +249,6 @@ tiffCmake() { # Does not work
     ..
     #LDFLAGS=-L$installDir/lib/ CPPFLAGS=-I$installDir/include/ CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
     #-DJPEG_LIBRARY="/usr/local/VAPOR-Deps/current/lib/libjpeg.so.9" \
@@ -259,15 +257,16 @@ tiffCmake() { # Does not work
     #-DJPEG_LIBRARY="$installDir/lib/libjpeg.so" \       ./build.sh: line 127: -DJPEG_LIBRARY=/usr/local/VAPOR-Deps/current/lib/libjpeg.so: No such file or directory
     
 sqlite() {
+    cd $baseDir
     local library='sqlite-autoconf-3410000'
     tar xvf $baseDir/$library.tar.gz
     cd $baseDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 proj() {
+    cd $baseDir
     #local library='proj-9.1.0' # does not work
     #local library='proj-6.3.1' # works
     local library='proj-7.2.1' # ?
@@ -292,10 +291,10 @@ proj() {
     ..
 
     make -j4 && make install
-    cd $baseDir
 }
 
 geotiff() {
+    cd $baseDir
     local library='libgeotiff-1.7.1'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
 
@@ -309,33 +308,33 @@ geotiff() {
     --with-proj=$installDir
 
     make -j4 && make install
-    cd $baseDir
 }
 
 xinerama() {
+    cd $baseDir
     local library='xcb-proto-1.15.2'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
     ./configure --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 
+    cd $baseDir
     library='libxcb-1.15'
     export PYTHONPATH=$installDir/local/lib/python3.10/dist-packages
     tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
     PYTHON=python3 PKG_CONFIG_PATH=$installDir/share/pkgconfig ./configure --without-doxygen --docdir='${datadir}'/doc/libxcb-1.15 --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 openssl() {
+    cd $baseDir
     local library='openssl-1.1.1t'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
     ./config shared --prefix=$installDir
     make -j4 && make install
-    cd $baseDir
 }
 
 python() {
+    cd $baseDir
     local library='cpython-3.9.16'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
     if [ $OS != "OSX" ] && [ $OS != "M1" ]; then
@@ -383,11 +382,10 @@ python() {
 
     $installDir/bin/python3.9.vapor -m pip install --upgrade pip
     $installDir/bin/pip3 install --upgrade --target $installDir/lib/python3.9/site-packages numpy scipy matplotlib
-
-    cd $baseDir
 }
 
 ospray() {
+    cd $baseDir
     if [ $OS != "OSX" ]; then
         local library='ospray-2.11.0.x86_64.linux'
         tar xvf $baseDir/ospray/$library.tar.gz && cd $baseDir/$library
@@ -397,32 +395,32 @@ ospray() {
     fi
     mkdir -p $installDir/Ospray
     cp -r * $installDir/Ospray
-    cd $baseDir
 }
 
 glm() {
+    cd $baseDir
     local library='glm-0.9.9.8'
     unzip $baseDir/$library.zip && cp -r $baseDir/glm/glm $installDir/include
     #unzip $library.zip && mkdir -p glm/build
     #cd glm/build
     #cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     #make -j4 && make install
-    cd $baseDir
 }
 
 gte() {
+    cd $baseDir
     tar xvf GTE.tar.xz
     mv GTE $installDir/include
-    cd $baseDir
 }
 
 images() {
+    cd $baseDir
     tar xvf images.tar.xz
     mv images $installDir/share
-    cd $baseDir
 }
 
 qt() {
+    cd $baseDir
     if [ $OS == "CentOS" ]; then
         local library='qt-everywhere-src-5.13.2'
     else 
