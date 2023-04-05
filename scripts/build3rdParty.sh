@@ -51,9 +51,8 @@ ubuntuPrerequisites() {
     apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
     apt install -y cmake --allow-unauthenticated
 
-    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0 pkg-config
-
-    apt-get install libssl-dev
+    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0 pkg-config unzip libssl-dev
+    
     # Qt
     apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
 }
