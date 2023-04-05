@@ -134,7 +134,9 @@ int MyPython::Initialize()
 
     if ((rc = pyImport("sys")) < 0) return rc;
 #ifndef DISABLE_EXTRA_PYTHON_MATH_IMPORTS
-    if ((rc = pyImport("matplotlib")) < 0) return rc;
+    // The following import does not work on python 3.9, despite the fact
+    // that matplot lib can be used in Vapor.  Commenting this for now.
+    //if ((rc = pyImport("matplotlib")) < 0) return rc;
 #else
     fprintf(stderr, "WARNING Vapor python matplotlib import disabled\n");
 #endif

@@ -1,8 +1,6 @@
 if (APPLE)
     set (THIRD_PARTY_DIR     /usr/local/VAPOR-Deps/current			           )
-    #set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/5.15.2/clang_64 )
     #set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/5.15.8/clang_64 )
-    #set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/lib/cmake/Qt5 )
     set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/lib/cmake )
     list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake                          )
 	set (OSPRAYDIR           ${THIRD_PARTY_DIR}/Ospray                         )
