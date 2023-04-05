@@ -1099,9 +1099,9 @@ jobs:
           name: update cmake
           command: |
             DEBIAN_FRONTEND=noninteractive
+            apt update
             apt install -y software-properties-common
             apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'     
-            apt update
             apt install -y cmake --allow-unauthenticated
 
       - run:
