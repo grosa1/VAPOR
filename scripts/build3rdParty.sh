@@ -42,16 +42,7 @@ ubuntuPrerequisites() {
     apt update -y
     apt upgrade -y
 
-    # All of this for updating to cmake > 3.16
-    #apt remove --purge --auto-remove cmake
-    #apt install -y software-properties-common lsb-release && \
-    #apt clean all
-    #wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-    #apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-    #apt install kitware-archive-keyring
-    #rm /etc/apt/trusted.gpg.d/kitware.gpg
-    #apt update
-    #apt install cmake
+    # all for cmake
     apt-get update
     apt-get install -y gpg wget
     wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
@@ -60,7 +51,7 @@ ubuntuPrerequisites() {
     apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
     apt install -y cmake --allow-unauthenticated
 
-    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0
+    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0 pkg-config
 
     apt-get install libssl-dev
     # Qt
