@@ -39,30 +39,25 @@ osxPrerequisites() {
 }
 
 ubuntuPrerequisites() {
-    sudo apt update
-    sudo apt upgrade
+    apt update
+    apt upgrade
 
     # All of this for updating to cmake > 3.16
-    sudo apt remove --purge --auto-remove cmake
-    sudo apt install -y software-properties-common lsb-release && \
-    sudo apt clean all
-    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-    sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-    sudo apt install kitware-archive-keyring
-    sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
-    sudo apt update
-    sudo apt install cmake
+    apt remove --purge --auto-remove cmake
+    apt install -y software-properties-common lsb-release && \
+    apt clean all
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+    apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+    apt install kitware-archive-keyring
+    rm /etc/apt/trusted.gpg.d/kitware.gpg
+    apt update
+    apt install cmake
 
-    #sudo apt install -y curl
-    sudo apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0
-    #sudo apt -y install 
-    #sudo apt install autoconf
-    #sudo apt install libtool
-    #sudo apt install libxcb-xinerama0
+    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0
 
-    sudo apt-get install libssl-dev
+    apt-get install libssl-dev
     # Qt
-    sudo apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+    apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
 }
 
 centosPrerequisites() {
@@ -207,8 +202,6 @@ jpeg() {
 }
 
 tiff() {
-    #sudo apt install autoconf
-    #sudo apt install libtool
     local library='libtiff-v4.5.0'
     tar xvf $baseDir/$library.tar.gz
     cd $baseDir/$library
@@ -228,8 +221,6 @@ tiff() {
 }
 
 tiffCmake() { # Does not work
-    #sudo apt install autoconf
-    #sudo apt install libtool
     local library='libtiff-v4.5.0'
     #local library='libtiff-v4.4.0'
     tar xvf $baseDir/$library.tar.gz
