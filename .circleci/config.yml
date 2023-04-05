@@ -1096,6 +1096,15 @@ jobs:
             #apt install -y lsb-release
 
       - run:
+          name: update cmake
+          command: |
+            DEBIAN_FRONTEND=noninteractive
+            apt install -y software-properties-common
+            apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'     
+            apt update
+            apt install -y cmake --allow-unauthenticated
+
+      - run:
           name: get source files
           command: |
             #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
@@ -1108,13 +1117,6 @@ jobs:
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             filename="/root/project/2023-src.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run:
-          name: update cmake
-          command: |
-            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'     
-            sudo apt update
-            sudo apt install cmake
 
       - run:
           name: make installer
