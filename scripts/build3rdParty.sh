@@ -22,19 +22,6 @@ do
 done
 
 
-if [ $OS == "OSX" ]; then
-    CC='clang'
-    CXX='clang++'
-    osxPrerequisites
-elif [ $OS == "Ubuntu" ]; then
-    ubuntuPrerequisites
-    CC='gcc'
-    CXX='g++'
-elif [ $OS == "CentOS" ]; then
-    centosPrerequisites
-    CC='gcc'
-    CXX='g++'
-fi
 
 #OS="OSX"
 #OS="M1"
@@ -94,6 +81,20 @@ centosPrerequisites() {
 	#echo 'export PATH="/usr/local/cmake/bin:$PATH"' >> ~/.bashrc
 	#source ~/.bashrc
 }
+
+if [ $OS == "OSX" ]; then
+    CC='clang'
+    CXX='clang++'
+    osxPrerequisites
+elif [ $OS == "Ubuntu" ]; then
+    ubuntuPrerequisites
+    CC='gcc'
+    CXX='g++'
+elif [ $OS == "CentOS" ]; then
+    centosPrerequisites
+    CC='gcc'
+    CXX='g++'
+fi
 
 libpng() {
     local library='libpng-1.6.39'

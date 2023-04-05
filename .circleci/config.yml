@@ -1124,6 +1124,7 @@ jobs:
       - run:
           name: make installer
           command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
 
       - run:
