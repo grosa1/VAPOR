@@ -110,7 +110,11 @@ assimp() {
     fi
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -Wno-error=deprecated-declarations" -Wno-error=deprecated-declarations ..
+    cmake -DCMAKE_INSTALL_PREFIX=$installDir \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations" \
+    -DASSIMP_BUILD_TESTS=OFF \
+    ..
     make -j4 && make install
 }
 
