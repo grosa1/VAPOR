@@ -102,7 +102,11 @@ libpng() {
 
 assimp() {
     cd $baseDir
-    local library='assimp-5.2.5'
+    if [ $OS == "CentOS" ]; then
+        local library='assimp-5.1.6'
+    else
+        local library='assimp-5.2.5' #requires c++17
+    fi
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -Wno-error=deprecated-declarations" -Wno-error=deprecated-declarations ..
