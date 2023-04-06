@@ -1114,13 +1114,8 @@ jobs:
           name: compress files
           command: |
             tar cfJ /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
-            #- store_artifacts:
-            #    path: /usr/local/VAPOR-Deps
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
+            - store_artifacts:
+                path: /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz
 
   build_centos7_libs:
     docker:
@@ -1151,13 +1146,9 @@ jobs:
           name: compress files
           command: |
             tar cfJ /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz /usr/local/VAPOR-Deps/current
-            - store_artifacts:
-                path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
 workflows:
   version: 2
