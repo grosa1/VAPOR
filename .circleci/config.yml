@@ -1158,7 +1158,7 @@ jobs:
           name: build libraries
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/projects/scripts/build3rdParty.sh -o OSX
+            /Users/distiller/project/scripts/build3rdParty.sh -o OSX
 
       - run:
           name: compress files
