@@ -1131,13 +1131,74 @@ jobs:
           name: compress files
           command: |
             tar cfJ /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
-            #- store_artifacts:
-            #    path: /usr/local/VAPOR-Deps
 
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps
+
+  build_osx_libs:
+    macos:
+      xcode: "13.4.1"
+
+    steps:
+      - checkout
+
+      - run:
+          name: get source files
+          command: |
+            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+            mkdir -p /usr/local/VAPOR-Deps
+            pip3 install gdown
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            filename="/root/project/2023-src.tar.xz"
+            tar xf $filename -C /usr/local/VAPOR-Deps
+            #chmod -R 777 /usr/local/VAPOR-Deps
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
+            /root/project/scripts/build3rdParty.sh -o OSX
+
+      - run:
+          name: compress files
+          command: |
+            tar cfJ /usr/local/VAPOR-Deps/2023-OSX.tar.xz /usr/local/VAPOR-Deps/current
+
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-OSX.tar.xz
+
+  build_centos7_libs:
+    docker:
+      - image: centos:7
+
+    steps:
+      - checkout
+
+      - run:
+          name: get source files
+          command: |
+            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+            mkdir -p /usr/local/VAPOR-Deps
+            apt update
+            apt install -y python3-pip
+            pip3 install gdown
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            filename="/root/project/2023-src.tar.xz"
+            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
+            /root/project/scripts/build3rdParty.sh -o CentOS
+
+      - run:
+          name: compress files
+          command: |
+            tar cfJ /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz /usr/local/VAPOR-Deps/current
+
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
 workflows:
   version: 2
