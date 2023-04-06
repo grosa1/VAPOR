@@ -61,6 +61,7 @@ centosPrerequisites() {
 	yum update -y
 	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel
     echo alias cmake=\'cmake3\' >> ~/.bashrc
+    . ~/.bashrc
 	#yum install -y kernel-devel
 	#yum install -y gcc
 	#yum install -y cmake3 make
