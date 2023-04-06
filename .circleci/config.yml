@@ -1079,33 +1079,16 @@ jobs:
       - checkout
 
       - run:
-          name: acquire prerequisites
-          command: |
-            DEBIAN_FRONTEND=noninteractive
-            #apt update
-            #apt install -y curl
-            #apt install -y xz-utils
-            #apt install -y git
-            #apt install -y g++
-            #apt install -y freeglut3-dev
-            #apt install -y libexpat1-dev
-            #apt install -y libglib2.0-0
-            #apt install -y libdbus-1-3
-            #apt install -y valgrind
-            #apt install -y clang-tidy
-            #apt install -y lsb-release
-
-      - run:
           name: update cmake
           command: |
             # https://apt.kitware.com/
-            apt-get update
-            apt-get install -y gpg wget
-            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
-            DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
-            apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'     
-            apt install -y cmake --allow-unauthenticated
+            #apt-get update
+            #apt-get install -y gpg wget
+            #wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            #echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            #DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+            #apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'     
+            #apt install -y cmake --allow-unauthenticated
 
       - run:
           name: get source files
@@ -1122,7 +1105,7 @@ jobs:
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
-          name: make installer
+          name: build libraries
           command: |
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
@@ -1139,6 +1122,97 @@ jobs:
           paths:
             - installers
 
+  build_centos7_libs:
+    docker:
+      - image: centos:7
+
+    steps:
+      - checkout
+
+      - run:
+          name: get source files
+          command: |
+            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+            mkdir -p /usr/local/VAPOR-Deps
+            apt update
+            apt install -y python3-pip
+            pip3 install gdown
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            filename="/root/project/2023-src.tar.xz"
+            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
+            /root/project/scripts/build3rdParty.sh -o CentOS
+
+      - run:
+          name: compress files
+          command: |
+            tar cfJ /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz /usr/local/VAPOR-Deps/current
+            - store_artifacts:
+                path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      #- clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
+      #- build_python_api_centos
+      #- build_python_api_osx
+      #- test_clang_format
+      #- build_win10_installer
+      #- build_osx_installer
+      #- build_M1_installer
+      #- build_ubuntu18_installer
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
+      #- build_centos7_installer
+      - build_ubuntu20_libs
+      - build_centos7_libs
+      #- build_osx_libs
+      #- release_weekly_installers:
+      #    requires:
+      #      - build_ubuntu18_installer
+      #      - build_centos7_installer
+      #      - build_osx_installer
+      #      - build_win10_installer
+  weekly:
+      triggers:
+        - schedule:
+             cron: "05 00 * * 4" #Mountain Standard Time +6
+             filters:
+               branches:
+                 only: main
+      jobs:
+        - build_ubuntu22_installer
+        - build_ubuntu18_installer
+        - build_centos7_installer
+        - build_osx_installer
+        - build_M1_installer
+        - build_win10_installer
+        #- build_python_api_ubuntu
+        #- build_python_api_osx
+        - release_weekly_installers:
+            requires:
+              - build_ubuntu22_installer
+              - build_ubuntu18_installer
+              - build_centos7_installer
+              - build_osx_installer
+              - build_M1_installer
+              - build_win10_installer
+              #- build_python_api_ubuntu
+              #- build_python_api_osx
 workflows:
   version: 2
   build:

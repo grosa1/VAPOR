@@ -59,13 +59,13 @@ ubuntuPrerequisites() {
 
 centosPrerequisites() {
 	sudo yum update -y
-	sudo yum install -y epel-release
-	sudo yum install -y kernel-devel
-	sudo yum install -y gcc
-	sudo yum install -y cmake3
-	sudo yum install -y xz-devel
-	sudo yum install -y zlib-devel
-	sudo yum install -y openssl-devel
+    yum install -y epel-release kernel-devel cmake3 xz-devel zlib-devel openssl-devel python3-pip
+	#sudo yum install -y kernel-devel
+	#sudo yum install -y gcc
+	#sudo yum install -y cmake3
+	#sudo yum install -y xz-devel
+	#sudo yum install -y zlib-devel
+	#sudo yum install -y openssl-devel
 
 	#curl -LO https://github.com/Kitware/CMake/releases/download/v3.26.0/cmake-3.26.0-linux-x86_64.tar.gz
 	#tar -xvf cmake-3.26.0.tar.gz
@@ -442,27 +442,27 @@ qt() {
 #    centosPrerequisites
 #fi
 
-#zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#jpeg
-#tiff
-#sqlite
-#proj
-#geotiff
-#if [ $OS == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#openssl
-#python
-#ospray
-#glm
-#gte
-#images
+zlib
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+jpeg
+tiff
+sqlite
+proj
+geotiff
+if [ $OS == "Ubuntu" ] ; then
+   xinerama
+fi         
+openssl
+python
+ospray
+glm
+gte
+images
 qt
