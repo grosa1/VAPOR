@@ -1146,7 +1146,8 @@ jobs:
           name: get source files
           command: |
             #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            mkdir -p /usr/local/VAPOR-Deps
+            sudo mkdir -p /usr/local/VAPOR-Deps
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             filename="/root/project/2023-src.tar.xz"
@@ -1179,8 +1180,8 @@ jobs:
           command: |
             #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
             mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
+            yum update -y
+            yum install -y python3-pip
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             filename="/root/project/2023-src.tar.xz"
