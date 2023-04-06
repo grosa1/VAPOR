@@ -59,8 +59,8 @@ ubuntuPrerequisites() {
 
 centosPrerequisites() {
 	yum update -y
-	#yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel gcc-c++
-	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel             openssl-devel gcc-c++
+	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel 
+    yum groupinstall -y "Development Tools"
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
     . ~/.bashrc
@@ -110,7 +110,8 @@ assimp() {
     fi
     tar xvf $baseDir/$library.tar.gz
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir \
+    cmake \
+    -DCMAKE_INSTALL_PREFIX=$installDir \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations" \
     -DASSIMP_BUILD_TESTS=OFF \
