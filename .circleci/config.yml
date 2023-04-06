@@ -1150,15 +1150,15 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-src.tar.xz"
-            sudo tar xf $filename -C /usr/local/VAPOR-Deps
+            filename="/Users/distiller/project/2023-src.tar.xz"
+            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
             sudo chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
           command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o OSX
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/projects/scripts/build3rdParty.sh -o OSX
 
       - run:
           name: compress files
