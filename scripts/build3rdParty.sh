@@ -413,10 +413,11 @@ qt() {
     cd $baseDir
     if [ $OS == "CentOS" ]; then
         local library='qt-everywhere-src-5.13.2'
+        tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
     else 
         local library='qt-everywhere-opensource-src-5.15.8'
+        tar xvf $baseDir/$library.tar.xz && cd $baseDir/qt-everywhere-src-5.15.8
     fi
-    tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
