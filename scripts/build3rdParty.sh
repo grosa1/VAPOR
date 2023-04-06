@@ -59,13 +59,13 @@ ubuntuPrerequisites() {
 
 centosPrerequisites() {
 	yum update -y
-	yum install -y epel-release
-	yum install -y kernel-devel
-	yum install -y gcc
-	yum install -y cmake3
-	yum install -y xz-devel
-	yum install -y zlib-devel
-	yum install -y openssl-devel
+	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel
+	#yum install -y kernel-devel
+	#yum install -y gcc
+	#yum install -y cmake3 make
+	#yum install -y xz-devel
+	#yum install -y zlib-devel
+	#yum install -y openssl-devel
 
 	#curl -LO https://github.com/Kitware/CMake/releases/download/v3.26.0/cmake-3.26.0-linux-x86_64.tar.gz
 	#tar -xvf cmake-3.26.0.tar.gz
