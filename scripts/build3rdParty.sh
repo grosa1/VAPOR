@@ -492,26 +492,26 @@ elif [ $OS == "Windows" ]; then
 fi
 
 zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#jpeg
-#tiff
-#sqlite
-#proj
-#geotiff
-#if [ $OS == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#openssl
-#python
-#ospray
-#glm
-#gte
-#images
-#qt
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+jpeg
+tiff
+sqlite
+proj
+geotiff
+if [ $OS == "Ubuntu" ] ; then
+   xinerama
+fi         
+openssl
+python
+ospray
+glm
+gte
+images
+qt
