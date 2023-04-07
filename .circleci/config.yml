@@ -1201,7 +1201,7 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
-  build_win10_installer:
+  build_win10_libs:
     executor: win/default
     steps:
       - checkout
