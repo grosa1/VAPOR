@@ -362,8 +362,8 @@ python() {
         --enable-shared \
         --with-ensurepip=install \
         --with-suffix=.vapor \
-        --enable-optimizations \
         --with-openssl=$installDir
+        --enable-optimizations \
     else
         #LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
         #LDFLAGS="-L$installDir/lib" \
