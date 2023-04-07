@@ -222,7 +222,11 @@ udunits() {
     cd $baseDir
     local library='udunits-2.2.28'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
-    LDFLAGS=-L$installDir/lib/ CPPFLAGS=-I$installDir/include/ CC=$CC CXX=$CXX ./configure --prefix=$installDir
+    LDFLAGS=-L$installDir/lib/ \
+    CPPFLAGS=-I$installDir/include/ \
+    CC=$CC CXX=$CXX \
+    ./configure \
+    --prefix=$installDir
     make -j4 && make install
 }
 
@@ -258,41 +262,15 @@ tiff() {
     autoheader
     automake --force-missing --add-missing
     autoconf
-    LDFLAGS=-L$installDir/lib CPPFLAGS=-I$installDir/include CC=$CC CXX=$CXX ./configure --prefix=$installDir --disable-dap
+    LDFLAGS=-L$installDir/lib \
+    CPPFLAGS=-I$installDir/include \
+    CC=$CC CXX=$CXX \
+    ./configure \
+    --prefix=$installDir \
+    --disable-dap
     make -j4 && make install
 }
 
-tiffCmake() { # Does not work
-    cd $baseDir
-    local library='libtiff-v4.5.0'
-    #local library='libtiff-v4.4.0'
-    tar xvf $baseDir/$library.tar.gz
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
-    
-    if [ $OS == "OSX" ] || [ $OS == "M1" ]; then
-        local jpegLib="-DSQLITE3_LIBRARY=$installDir/lib/libjpeg.dylib"
-    else
-        local jpegLib="-DSQLITE3_LIBRARY=$installDir/lib/libjpeg.so"
-    fi
-
-    cmake \
-    -DCMAKE_PREFIX_PATH="$installDir" \
-    -Djpeg=ON \
-    -DBUILD_SHARED_LIBS=ON \
-    -DJPEG_INCLUDE_DIR="$installDir/include" \
-    -DJPEG_LIBRARY="/usr/local/VAPOR-Deps/current/lib/libjpeg.so.9" \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_BUILD_TYPE=Release \
-    ..
-    #LDFLAGS=-L$installDir/lib/ CPPFLAGS=-I$installDir/include/ CC=$CC CXX=$CXX ./configure --prefix=$installDir
-    make -j4 && make install
-}
-
-    #-DJPEG_LIBRARY="/usr/local/VAPOR-Deps/current/lib/libjpeg.so.9" \
-    #-DJPEG_LIBRARY="$installDir/lib/libjpeg.so.9" \
-    #-DJPEG_LIBRARY="$installDir/lib" \                  /usr/bin/ld: cannot find /usr/local/VAPOR-Deps/current/lib: file format not recognized
-    #-DJPEG_LIBRARY="$installDir/lib/libjpeg.so" \       ./build.sh: line 127: -DJPEG_LIBRARY=/usr/local/VAPOR-Deps/current/lib/libjpeg.so: No such file or directory
-    
 sqlite() {
     cd $baseDir
     local library='sqlite-autoconf-3410000'
@@ -310,7 +288,6 @@ proj() {
     tar xvf $baseDir/$library.tar.gz
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
-
     
     if [ $OS == "OSX" ] || [ $OS == "M1" ]; then
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.dylib"
@@ -323,6 +300,7 @@ proj() {
     -DEXE_SQLITE3=$installDir/bin/sqlite3 \
     -DSQLITE3_INCLUDE_DIR=$installDir/include \
     $sqliteLib \
+    -DCMAKE_INSTALL_LIBDIR=lib
     -DCMAKE_INSTALL_PREFIX=$installDir \
     -DPROJ_COMPILER_NAME=$CXX \
     ..
