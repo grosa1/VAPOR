@@ -29,6 +29,8 @@ done
 #CXX='clang++'
 
 osxPrerequisites() {
+    CC='clang'
+    CXX='clang++'
     brew install cmake
     brew install autoconf
     brew install atool
@@ -39,6 +41,8 @@ osxPrerequisites() {
 }
 
 ubuntuPrerequisites() {
+    CC='gcc'
+    CXX='g++'
     apt update -y
     apt upgrade -y
 
@@ -51,19 +55,49 @@ ubuntuPrerequisites() {
     apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
     apt install -y cmake --allow-unauthenticated
 
-    apt install -y m4 libcurl4-openssl-dev libxau-dev autoconf libtool libxcb-xinerama0 pkg-config unzip libssl-dev
+    apt install -y \
+        m4 \
+        libcurl4-openssl-dev \
+        libxau-dev \
+        autoconf \
+        libtool \
+        libxcb-xinerama0 \
+        pkg-config \
+        unzip \
+        libssl-dev
     
     # Qt
-    apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+    apt-get install -y \
+        '^libxcb.*-dev' \
+        libx11-xcb-dev \
+        libglu1-mesa-dev \
+        libxrender-dev \
+        libxi-dev \
+        libxkbcommon-dev \
+        libxkbcommon-x11-dev
 }
 
 centosPrerequisites() {
+    CC='gcc'
+    CXX='g++'
 	yum update -y
-	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel expat-devel curl
-    yum groupinstall -y "Development Tools"
+	yum install -y \
+        epel-release \
+        kernel-devel \
+        gcc \
+        cmake3 \
+        make xz-devel \
+        zlib-devel \
+        openssl-devel \
+        expat-devel \
+        libcurl-devel
+
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
     . ~/.bashrc
+
+    yum groupinstall -y "Development Tools"
+
 	#yum install -y kernel-devel
 	#yum install -y gcc
 	#yum install -y cmake3 make
@@ -78,18 +112,18 @@ centosPrerequisites() {
 	#source ~/.bashrc
 }
 
+windowsPrerequisites() {
+    choco install visualstudio2019-workload-vctools python cmake -y
+    setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+    python -m pip install gdown
+}
+
 if [ $OS == "OSX" ]; then
-    CC='clang'
-    CXX='clang++'
     osxPrerequisites
 elif [ $OS == "Ubuntu" ]; then
     ubuntuPrerequisites
-    CC='gcc'
-    CXX='g++'
 elif [ $OS == "CentOS" ]; then
     centosPrerequisites
-    CC='gcc'
-    CXX='g++'
 fi
 
 libpng() {
@@ -453,29 +487,31 @@ elif [ $OS == "Ubuntu" ]; then
     ubuntuPrerequisites
 elif [ $OS == "CentOS" ]; then
     centosPrerequisites
+elif [ $OS == "Windows" ]; then
+    windowsPrerequisites
 fi
 
 zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ $OS == "Ubuntu" ] ; then
-   xinerama
-fi         
-openssl
-python
-ospray
-glm
-gte
-images
-qt
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ $OS == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#openssl
+#python
+#ospray
+#glm
+#gte
+#images
+#qt

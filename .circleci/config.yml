@@ -1201,6 +1201,25 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
+  build_win10_installer:
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          name: get source files
+          command: |
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            tar xvf ${filename} -C /usr/local/VAPOR-Deps
+            msbuild -version
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
+            /root/project/scripts/build3rdParty.sh -o Windows
+
+      - store_artifacts:
+          path: C:\Users\circleci\project\tmp\workspace\installers
+
 workflows:
   version: 2
   build:
