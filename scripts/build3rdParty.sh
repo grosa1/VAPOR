@@ -468,6 +468,8 @@ elif [ $OS == "Windows" ]; then
     windowsPrerequisites
 fi
 
+openssl
+python
 zlib
 libpng
 assimp
@@ -485,8 +487,6 @@ geotiff
 if [ $OS == "Ubuntu" ] ; then
    xinerama
 fi         
-openssl
-python
 ospray
 glm
 gte
