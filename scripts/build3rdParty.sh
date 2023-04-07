@@ -352,22 +352,7 @@ python() {
     cd $baseDir
     local library='cpython-3.9.16'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
-    if [ $OS != "OSX" ] && [ $OS != "M1" ]; then
-        CPPFLAGS=-I$installDir/include \
-        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-        CC=$CC \
-        CXX=$CXX \
-        ./configure \
-        --prefix=$installDir \
-        --enable-shared \
-        --with-ensurepip=install \
-        --with-suffix=.vapor \
-        --with-openssl=$installDir
-        --enable-optimizations \
-    else
-        #LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-        #LDFLAGS="-L$installDir/lib" \
-        #LDFLAGS="-L$installDir/lib -rpath=$installDir/lib" \
+    if [ $OS = "OSX" ] && [ $OS = "M1" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
@@ -382,15 +367,29 @@ python() {
         --with-openssl=$(brew --prefix openssl@1.1) \
         --with-tcltk-libs="$(pkg-config --libs tcl tk)" \
         --with-tcltk-includes="$(pkg-config --cflags tcl tk)"
-        #CPPFLAGS=-I$installDir/include \
-        #LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-        #./configure \
-        #--prefix=$installDir \
-        #--enable-shared \
-        #--with-ensurepip=install \
-        #--with-suffix=.vapor \
-        #--enable-optimizations \
-        #--with-openssl=$installDir
+    elif [ $OS = "CentOS" ]; then
+        CPPFLAGS=-I$installDir/include \
+        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
+        CC=$CC \
+        CXX=$CXX \
+        ./configure \
+        --prefix=$installDir \
+        --enable-shared \
+        --with-ensurepip=install \
+        --with-suffix=.vapor \
+        --with-openssl=$installDir
+    else
+        CPPFLAGS=-I$installDir/include \
+        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
+        CC=$CC \
+        CXX=$CXX \
+        ./configure \
+        --prefix=$installDir \
+        --enable-shared \
+        --with-ensurepip=install \
+        --with-suffix=.vapor \
+        --enable-optimizations \
+        --with-openssl=$installDir
     fi
 
     make -j4 && make install
