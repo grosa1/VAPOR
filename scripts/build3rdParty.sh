@@ -344,7 +344,7 @@ openssl() {
     cd $baseDir
     local library='openssl-1.1.1t'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
-    ./config shared --prefix=$installDir
+    ./config shared --prefix=$installDir --openssldir=$installDir
     make -j4 && make install
 }
 
@@ -469,27 +469,27 @@ elif [ $OS == "Windows" ]; then
     windowsPrerequisites
 fi
 
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ $OS == "Ubuntu" ] ; then
-   xinerama
-fi         
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ $OS == "Ubuntu" ] ; then
+#   xinerama
+#fi         
 openssl
 python
-ospray
-glm
-gte
-images
-qt
+#ospray
+#glm
+#gte
+#images
+#qt
