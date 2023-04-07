@@ -85,8 +85,10 @@ centosPrerequisites() {
         epel-release \
         kernel-devel \
         gcc \
+        gcc-c++ \
         cmake3 \
-        make xz-devel \
+        make \
+        xz-devel \
         zlib-devel \
         openssl-devel \
         expat-devel \
