@@ -300,7 +300,7 @@ proj() {
     -DEXE_SQLITE3=$installDir/bin/sqlite3 \
     -DSQLITE3_INCLUDE_DIR=$installDir/include \
     $sqliteLib \
-    -DCMAKE_INSTALL_LIBDIR=lib
+    -DCMAKE_INSTALL_LIBDIR=lib \
     -DCMAKE_INSTALL_PREFIX=$installDir \
     -DPROJ_COMPILER_NAME=$CXX \
     ..
