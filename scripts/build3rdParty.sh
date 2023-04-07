@@ -59,7 +59,7 @@ ubuntuPrerequisites() {
 
 centosPrerequisites() {
 	yum update -y
-	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel 
+	yum install -y epel-release kernel-devel gcc cmake3 make xz-devel zlib-devel openssl-devel expat-devel
     yum groupinstall -y "Development Tools"
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
