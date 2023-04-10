@@ -440,8 +440,9 @@ qt() {
     if [ $OS == "CentOS" ]; then
         #local library='qt-everywhere-src-5.13.2'
         yum install -y wget
+        rm -rf /usr/local/VAPOR-Deps/2023-Mar-src/qt-everywhere-src-5.13.2.tar.xz
         wget https://download.qt.io/archive/qt/5.13/5.13.2/single/qt-everywhere-src-5.13.2.tar.xz
-        tar xvf $baseDir/$library.tar.xz.1 && cd $baseDir/$library
+        tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
     else 
         local library='qt-everywhere-opensource-src-5.15.8'
         tar xvf $baseDir/$library.tar.xz && cd $baseDir/qt-everywhere-src-5.15.8
