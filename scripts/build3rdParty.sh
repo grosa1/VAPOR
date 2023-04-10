@@ -438,7 +438,8 @@ images() {
 qt() {
     cd $baseDir
     if [ $OS == "CentOS" ]; then
-        local library='qt-everywhere-src-5.13.2'
+        #local library='qt-everywhere-src-5.13.2'
+        wget https://download.qt.io/archive/qt/5.13/5.13.2/single/qt-everywhere-src-5.13.2.tar.xz
         tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
     else 
         local library='qt-everywhere-opensource-src-5.15.8'
