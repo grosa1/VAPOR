@@ -453,7 +453,9 @@ qt() {
     -prefix $installDir \
     -opensource \
     -confirm-license \
-    -release
+    -release \
+    -nomake examples \
+    -nomake tests
     
     make -j4 && make install
     #Qt/qt-unified-linux-x64-4.5.1-online.run --script Qt/qt-installer-noninteractive.qs
