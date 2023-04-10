@@ -460,7 +460,11 @@ qt() {
     -nomake examples \
     -nomake tests
     
-    make -j4 && make install
+    if [ $OS == "CentOS" ]; then
+        /usr/bin/make -j4 && make install # CentOS can't find make when building qt as of 4/10/20023, so give full path to make
+    else
+        make -j4 && make install
+    fi
     #Qt/qt-unified-linux-x64-4.5.1-online.run --script Qt/qt-installer-noninteractive.qs
 }
 
@@ -475,27 +479,27 @@ elif [ $OS == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-python
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ $OS == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
+#openssl
+#python
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ $OS == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
 qt
