@@ -92,7 +92,8 @@ centosPrerequisites() {
         zlib-devel \
         openssl-devel \
         expat-devel \
-        libcurl-devel
+        libcurl-devel \
+        qt5-qtbase-devel
 
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
