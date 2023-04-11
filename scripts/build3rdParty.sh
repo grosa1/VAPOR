@@ -93,7 +93,8 @@ centosPrerequisites() {
         openssl-devel \
         expat-devel \
         libcurl-devel \
-        qt5-qtbase-devel
+        qt5-qtbase-devel \
+        which
 
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
@@ -455,6 +456,21 @@ qt() {
     -nomake examples \
     -nomake tests
     
+    #../configure \
+    #-prefix=/usr/local/VAPOR-Deps/current \
+    #-opensource \
+    #-confirm-license \
+    #-release \
+    #-nomake examples \
+    #-nomake tests
+
+    #./configure \
+    #-prefix=/usr/local/VAPOR-Deps/current \
+    #-opensource \
+    #-confirm-license \
+    #-release \
+    #-nomake examples \
+    #-nomake tests
     make -j4 && make install
     #Qt/qt-unified-linux-x64-4.5.1-online.run --script Qt/qt-installer-noninteractive.qs
 }
