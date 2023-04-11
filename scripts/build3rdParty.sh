@@ -95,6 +95,9 @@ centosPrerequisites() {
         libcurl-devel \
         which
 
+    cmake --version
+    cmake3 --version
+
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
     . ~/.bashrc
