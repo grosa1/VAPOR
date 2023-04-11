@@ -435,29 +435,25 @@ qt() {
         yum install -y wget
         rm -rf /usr/local/VAPOR-Deps/2023-Mar-src/qt-everywhere-src-5.13.2.tar.xz
         wget https://download.qt.io/archive/qt/5.13/5.13.2/single/qt-everywhere-src-5.13.2.tar.xz
-        tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
+        tar xvf $baseDir/$library.tar.xz && mkdir -p $baseDir/$library/build && cd !$
     else 
         local library='qt-everywhere-opensource-src-5.15.8'
         tar xvf $baseDir/$library.tar.xz && cd $baseDir/qt-everywhere-src-5.15.8
     fi
 
-    #CPPFLAGS=-I$installDir/include \
-    #LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-    #CC=$CC \
-    #CXX=$CXX \
-    #./configure \
-    #-prefix $installDir \
-    #-opensource \
-    #-confirm-license \
-    #-release \
-    #-nomake examples \
-    #-nomake tests
+    CPPFLAGS=-I$installDir/include \
+    LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
+    CC=$CC \
+    CXX=$CXX \
+    ../configure \
+    -prefix $installDir \
+    -opensource \
+    -confirm-license \
+    -release \
+    -nomake examples \
+    -nomake tests
     
-    #if [ $OS == "CentOS" ]; then
-    #    /usr/bin/make -j4 && make install # CentOS can't find make when building qt as of 4/10/20023, so give full path to make
-    #else
-    #    make -j4 && make install
-    #fi
+    make -j4 && make install
     #Qt/qt-unified-linux-x64-4.5.1-online.run --script Qt/qt-installer-noninteractive.qs
 }
 
