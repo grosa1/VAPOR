@@ -449,7 +449,7 @@ qt() {
     CC=$CC \
     CXX=$CXX \
     ../configure \
-    -prefix=$installDir \
+    -prefix $installDir \
     -opensource \
     -confirm-license \
     -release \
