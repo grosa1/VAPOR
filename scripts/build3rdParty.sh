@@ -93,7 +93,6 @@ centosPrerequisites() {
         openssl-devel \
         expat-devel \
         libcurl-devel \
-        qt5-qtbase-devel \
         which
 
     shopt -s expand_aliases
