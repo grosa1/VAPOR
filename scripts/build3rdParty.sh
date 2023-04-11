@@ -121,14 +121,6 @@ windowsPrerequisites() {
     python -m pip install gdown
 }
 
-if [ $OS == "OSX" ]; then
-    osxPrerequisites
-elif [ $OS == "Ubuntu" ]; then
-    ubuntuPrerequisites
-elif [ $OS == "CentOS" ]; then
-    centosPrerequisites
-fi
-
 libpng() {
     cd $baseDir
     local library='libpng-1.6.39'
@@ -503,4 +495,4 @@ fi
 #glm
 #gte
 #images
-qt
+#qt
