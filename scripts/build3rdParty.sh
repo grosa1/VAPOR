@@ -467,27 +467,27 @@ elif [ $OS == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-python
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ $OS == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
-qt
+#openssl
+#python
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ $OS == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
+#qt
