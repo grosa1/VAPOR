@@ -441,7 +441,7 @@ qt() {
         #tar xvf $baseDir/$library.tar.xz && cd $baseDir/qt-everywhere-src-5.15.8
     fi
 
-    tar xvf $baseDir/$library.tar.xz && mkdir -p $baseDir/$library/build && cd !$
+    tar xvf $baseDir/$library.tar.xz && mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
