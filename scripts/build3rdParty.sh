@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # To install:           Uncomment 'prerequisites' and the library name you'd like, 
 #                       listed at the bottom of this file.  Then run build.sh.
 #
