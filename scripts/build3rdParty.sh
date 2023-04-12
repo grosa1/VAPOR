@@ -361,11 +361,11 @@ openssl() {
     make -j4 && make install
 }
 
-python() {
+pythonVapor() {
     cd $baseDir
     local library='cpython-3.9.16'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
-    if [ "$OS" = "OSX" ] && [ "$OS" = "M1" ]; then
+    if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
@@ -483,7 +483,7 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
-python
+pythonVapor
 zlib
 libpng
 assimp
