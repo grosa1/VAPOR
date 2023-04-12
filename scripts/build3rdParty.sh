@@ -10,6 +10,7 @@ set -e
 if [ $OS == "CentOS" ]; then
     shopt -s expand_aliases
     alias cmake=cmake3
+    alias
 fi
 
 OS="CentOS"
