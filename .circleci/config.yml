@@ -1190,6 +1190,8 @@ jobs:
       - run:
           name: build libraries
           command: |
+            yum update -y
+            yum install -y cmake3
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o CentOS
 
