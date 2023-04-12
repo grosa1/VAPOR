@@ -89,9 +89,9 @@ centosPrerequisites() {
         which
 	yum update -y
 
-    #shopt -s expand_aliases
+    shopt -s expand_aliases
     alias cmake='cmake3'
-    #shopt -s expand_aliases
+    shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
     . ~/.bashrc
     source ~/.bashrc
