@@ -466,9 +466,10 @@ qt() {
     -confirm-license \
     -release \
     -nomake examples \
-    -nomake tests
+    -nomake tests > qtConfig.txt
     
-    make -j4 && make install
+    make -j4 > qtMake.txt
+    make install > qtInstall.txt
 }
 
 
