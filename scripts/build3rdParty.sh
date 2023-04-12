@@ -77,6 +77,28 @@ ubuntuPrerequisites() {
         libxkbcommon-x11-dev
 }
 
+windowsPrerequisites() {
+    CC='i686-w64-mingw-gcc'
+    CXX='i686-w64-mingw-g++'
+    apt update -y
+    apt upgrade -y
+
+    # all for cmake
+    apt-get update
+    apt-get install -y gpg wget
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+    DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+    apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
+    apt install -y cmake --allow-unauthenticated
+
+    apt install mingw-64
+
+    #choco install visualstudio2019-workload-vctools python cmake -y
+    #setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+    #python -m pip install gdown
+}
+
 centosPrerequisites() {
     CC='gcc'
     CXX='g++'
@@ -93,7 +115,9 @@ centosPrerequisites() {
         openssl-devel \
         expat-devel \
         libcurl-devel \
-        which
+        which \
+        mesa-libGL-devel \
+        mesa-libGLU-devel
 	yum update -y
 
     #shopt -s expand_aliases
@@ -113,12 +137,6 @@ centosPrerequisites() {
 	#mv cmake-3.26.0 /usr/local/cmake
 	#echo 'export PATH="/usr/local/cmake/bin:$PATH"' >> ~/.bashrc
 	#source ~/.bashrc
-}
-
-windowsPrerequisites() {
-    choco install visualstudio2019-workload-vctools python cmake -y
-    setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
-    python -m pip install gdown
 }
 
 libpng() {
