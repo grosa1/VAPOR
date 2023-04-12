@@ -94,18 +94,12 @@ centosPrerequisites() {
     #shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
     . ~/.bashrc
+    source ~/.bashrc
 
     cmake --version
     cmake3 --version
 
     yum groupinstall -y "Development Tools"
-
-	#yum install -y kernel-devel
-	#yum install -y gcc
-	#yum install -y cmake3 make
-	#yum install -y xz-devel
-	#yum install -y zlib-devel
-	#yum install -y openssl-devel
 
 	#curl -LO https://github.com/Kitware/CMake/releases/download/v3.26.0/cmake-3.26.0-linux-x86_64.tar.gz
 	#tar -xvf cmake-3.26.0.tar.gz

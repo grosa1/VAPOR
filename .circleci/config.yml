@@ -1183,9 +1183,9 @@ jobs:
             yum update -y
             yum install -y python3-pip
             pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-src.tar.xz"
-            tar xvf ${filename} -C /usr/local/VAPOR-Deps
+            #gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            #filename="/root/project/2023-src.tar.xz"
+            #tar xvf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1193,7 +1193,7 @@ jobs:
             #yum update -y
             #yum install -y cmake3
             chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o CentOS
+            source /root/project/scripts/build3rdParty.sh -o CentOS
 
       - run:
           name: compress files
