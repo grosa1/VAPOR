@@ -81,19 +81,20 @@ centosPrerequisites() {
     CC='gcc'
     CXX='g++'
 	yum update -y
-	yum install -y \
-        epel-release \
-        kernel-devel \
-        gcc \
-        gcc-c++ \
-        cmake3 \
-        make \
-        xz-devel \
-        zlib-devel \
-        openssl-devel \
-        expat-devel \
-        libcurl-devel \
-        which
+	yum install -y cmake3
+	#yum install -y \
+    #    epel-release \
+    #    kernel-devel \
+    #    gcc \
+    #    gcc-c++ \
+    #    cmake3 \
+    #    make \
+    #    xz-devel \
+    #    zlib-devel \
+    #    openssl-devel \
+    #    expat-devel \
+    #    libcurl-devel \
+    #    which
 
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
