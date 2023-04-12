@@ -8,7 +8,6 @@
 
 set -e
 
-#OS="Ubuntu"
 OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps/2023-Mar-src'
 installDir='/usr/local/VAPOR-Deps/current'
@@ -20,13 +19,6 @@ do
         o) OS=${OPTARG};;
     esac
 done
-
-
-
-#OS="OSX"
-#OS="M1"
-#CC='clang'
-#CXX='clang++'
 
 osxPrerequisites() {
     CC='clang'
@@ -96,9 +88,10 @@ centosPrerequisites() {
         which
 	yum update -y
 
-    shopt -s expand_aliases
-    echo alias cmake=\'cmake3\' >> ~/.bashrc
-    . ~/.bashrc
+    alias cmake='cmake3'
+    #shopt -s expand_aliases
+    #echo alias cmake=\'cmake3\' >> ~/.bashrc
+    #. ~/.bashrc
 
     cmake --version
     cmake3 --version
