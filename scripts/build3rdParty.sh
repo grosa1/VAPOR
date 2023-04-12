@@ -9,7 +9,7 @@
 #                       xargs rm < install_manifest.txt
 
 set -e
-if [ $OS == "CentOS" ]; then
+if [ "$OS" = "CentOS" ]; then
     shopt -s expand_aliases
     alias cmake=cmake3
     alias
@@ -131,7 +131,7 @@ libpng() {
 
 assimp() {
     cd $baseDir
-    if [ $OS == "CentOS" ]; then
+    if [ "$OS" == "CentOS" ]; then
         local library='assimp-5.1.6'
     else
         local library='assimp-5.2.5' #requires c++17
@@ -172,14 +172,14 @@ szip() {
 hdfVersion='1.12.2'
 hdf5() {
     cd $baseDir
-    if [ $OS == "Ubuntu" ] || [ $OS == "CentOS" ]; then
+    if [ "$OS" == "Ubuntu" ] || [ "$OS" == "CentOS" ]; then
         #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
         tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
         ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
-    elif [ $OS == "OSX" ]; then
+    elif [ "$OS" == "OSX" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
-    elif [ $OS == "M1" ]; then
+    elif [ "$OS" == "M1" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
     fi
@@ -247,7 +247,7 @@ tiff() {
     local library='libtiff-v4.5.0'
     tar xvf $baseDir/$library.tar.gz
     cd $baseDir/$library
-    if [ $OS == "OSX" ] || [ $OS == "M1" ]; then
+    if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
         glibtoolize --force
     else
         libtoolize --force
@@ -283,7 +283,7 @@ proj() {
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
     mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
     
-    if [ $OS == "OSX" ] || [ $OS == "M1" ]; then
+    if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.dylib"
     else
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.so"
@@ -346,7 +346,7 @@ python() {
     cd $baseDir
     local library='cpython-3.9.16'
     tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
-    if [ $OS = "OSX" ] && [ $OS = "M1" ]; then
+    if [ "$OS" = "OSX" ] && [ "$OS" = "M1" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
@@ -361,7 +361,7 @@ python() {
         --with-openssl=$(brew --prefix openssl@1.1) \
         --with-tcltk-libs="$(pkg-config --libs tcl tk)" \
         --with-tcltk-includes="$(pkg-config --cflags tcl tk)"
-    elif [ $OS = "CentOS" ]; then
+    elif [ "$OS" = "CentOS" ]; then
         CPPFLAGS=-I$installDir/include \
         LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
         CC=$CC \
@@ -394,7 +394,7 @@ python() {
 
 ospray() {
     cd $baseDir
-    if [ $OS != "OSX" ]; then
+    if [ "$OS" != "OSX" ]; then
         local library='ospray-2.11.0.x86_64.linux'
         tar xvf $baseDir/ospray/$library.tar.gz && cd $baseDir/$library
     else
@@ -429,7 +429,7 @@ images() {
 
 qt() {
     cd $baseDir
-    if [ $OS == "CentOS" ]; then
+    if [ "$OS" == "CentOS" ]; then
         local library='qt-everywhere-src-5.13.2'
     else 
         local library='qt-everywhere-opensource-src-5.15.8'
@@ -453,13 +453,13 @@ qt() {
 }
 
 
-if [ $OS == "OSX" ]; then
+if [ "$OS" == "OSX" ]; then
     osxPrerequisites
-elif [ $OS == "Ubuntu" ]; then
+elif [ "$OS" == "Ubuntu" ]; then
     ubuntuPrerequisites
-elif [ $OS == "CentOS" ]; then
+elif [ "$OS" == "CentOS" ]; then
     centosPrerequisites
-elif [ $OS == "Windows" ]; then
+elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
@@ -479,7 +479,7 @@ tiff
 sqlite
 proj
 geotiff
-if [ $OS == "Ubuntu" ] ; then
+if [ "$OS" == "Ubuntu" ] ; then
    xinerama
 fi         
 ospray
