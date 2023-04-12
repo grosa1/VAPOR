@@ -1178,24 +1178,19 @@ jobs:
       - run:
           name: get source files
           command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
             mkdir -p /usr/local/VAPOR-Deps
             yum update -y
             yum install -y python3-pip
             pip3 install gdown
-            #gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            #filename="/root/project/2023-src.tar.xz"
-            #tar xvf ${filename} -C /usr/local/VAPOR-Deps
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            filename="/root/project/2023-src.tar.xz"
+            tar xvf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
           command: |
-            #yum update -y
-            #yum install -y cmake3
             chmod 777 /root/project/scripts/build3rdParty.sh
-            # run build3rdParty.sh in interactive mode to expand aliases
             /root/project/scripts/build3rdParty.sh -o CentOS
-            #bash -i /root/project/scripts/build3rdParty.sh -o CentOS
 
       - run:
           name: compress files
