@@ -7,6 +7,7 @@
 #                       xargs rm < install_manifest.txt
 
 set -e
+shopt -s expand_aliases
 
 OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps/2023-Mar-src'
@@ -88,11 +89,11 @@ centosPrerequisites() {
         which
 	yum update -y
 
-    shopt -s expand_aliases
+    #shopt -s expand_aliases
     alias cmake='cmake3'
     #shopt -s expand_aliases
-    #echo alias cmake=\'cmake3\' >> ~/.bashrc
-    #. ~/.bashrc
+    echo alias cmake=\'cmake3\' >> ~/.bashrc
+    . ~/.bashrc
 
     cmake --version
     cmake3 --version
