@@ -86,7 +86,7 @@ centosPrerequisites() {
         kernel-devel \
         gcc \
         gcc-c++ \
-        cmake3 \ # CircleCI will NOT install cmake from this command, so we must do it in .circleci/config.yml
+        cmake3 \
         make \
         xz-devel \
         zlib-devel \
@@ -94,6 +94,7 @@ centosPrerequisites() {
         expat-devel \
         libcurl-devel \
         which
+	yum update -y
 
     shopt -s expand_aliases
     echo alias cmake=\'cmake3\' >> ~/.bashrc
