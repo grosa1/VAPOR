@@ -1193,7 +1193,7 @@ jobs:
             #yum update -y
             #yum install -y cmake3
             chmod 777 /root/project/scripts/build3rdParty.sh
-            source /root/project/scripts/build3rdParty.sh -o CentOS
+            /root/project/scripts/build3rdParty.sh -o CentOS
 
       - run:
           name: compress files
