@@ -9,13 +9,8 @@
 #                       xargs rm < install_manifest.txt
 
 set -e
-if [ "$OS" = "CentOS" ]; then
-    shopt -s expand_aliases
-    alias cmake=cmake3
-    alias
-fi
 
-OS="CentOS"
+#OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps/2023-Mar-src'
 installDir='/usr/local/VAPOR-Deps/current'
 while getopts o:b:i flag
@@ -26,6 +21,12 @@ do
         o) OS=${OPTARG};;
     esac
 done
+
+if [ "$OS" = "CentOS" ]; then
+    shopt -s expand_aliases
+    alias cmake=cmake3
+    alias
+fi
 
 osxPrerequisites() {
     CC='clang'
