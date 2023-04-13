@@ -38,11 +38,6 @@ release = '3.8.0'
 #breathe_default_project = "myproject"
 
 extensions = [
-    'sphinx.ext.imgmath', 
-    'sphinx.ext.todo', 
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx_gallery.gen_gallery',
     #'jupyter_sphinx.execute'
     #'breathe'
     #'wheel'
