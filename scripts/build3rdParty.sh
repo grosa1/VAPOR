@@ -451,6 +451,7 @@ qt() {
     if [ "$OS" == "CentOS" ]; then
         local library='qt-everywhere-src-5.13.2'
         tar xf $baseDir/$library.tar.xz
+        mkdir -p $baseDir/$library/build
         cd $baseDir/$library/build
     else 
         tar xf $baseDir/qt-everywhere-opensource-src-5.15.8.tar.xz
