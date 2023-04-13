@@ -454,7 +454,7 @@ qt() {
         local library='qt-everywhere-opensource-src-5.15.8'
     fi
 
-    tar xvf $baseDir/$library.tar.xz > qtTar.txt
+    tar xf $baseDir/$library.tar.xz > qtTar.txt
     mkdir -p $baseDir/$library/build
     cd $baseDir/$library/build
 
