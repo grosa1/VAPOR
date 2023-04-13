@@ -454,7 +454,9 @@ qt() {
         local library='qt-everywhere-opensource-src-5.15.8'
     fi
 
-    tar xvf $baseDir/$library.tar.xz && mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $baseDir/$library.tar.xz > qtTar.txt
+    mkdir -p $baseDir/$library/build
+    cd $baseDir/$library/build
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
@@ -483,27 +485,27 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
+#openssl
+#pythonVapor
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
 qt
