@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - ncar-vapor
+  - defaults
+dependencies:
+  - sphinx=5.3.0
+  - sphinx-rtd-theme
+  - sphinx-gallery
+  - sphinx-book-theme
+  - python=3.9
+  - vapor
