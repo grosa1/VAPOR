@@ -1076,16 +1076,15 @@ jobs:
       - image: ubuntu:20.04
 
     steps:
-      - checkout
-
       - run:
           name: acquire prerequisites
           command: |
             DEBIAN_FRONTEND=noninteractive
-            #apt update
+            apt update
             #apt install -y curl
             #apt install -y xz-utils
-            #apt install -y git
+            apt install -y git
+            git config --global --add safe.directory /tmp/_circleci_local_build_repo
             #apt install -y g++
             #apt install -y freeglut3-dev
             #apt install -y libexpat1-dev
@@ -1095,9 +1094,13 @@ jobs:
             #apt install -y clang-tidy
             #apt install -y lsb-release
 
+      - checkout
+
       - run:
           name: update cmake
           command: |
+            ls /root/project
+            pwd
             # https://apt.kitware.com/
             apt-get update
             apt-get install -y gpg wget
